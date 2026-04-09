@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Твой Путь</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;600;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #3b82f6;
+            --accent-light: #60a5fa;
+            --text-main: #f8fafc;
+            --text-desc: #cbd5e1;
+            --input-bg: #1e293b;
+            --disabled: #334155;
+            --modal-overlay: rgba(2, 6, 23, 0.95);
+        }
+
+        body {
+            font-family: 'Comfortaa', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .container { width: 100%; max-width: 420px; padding: 20px 24px; display: flex; flex-direction: column; align-items: center; }
+        .progress-stepper { display: flex; gap: 6px; margin-bottom: 30px; width: 100%; }
+        .dot { height: 4px; flex-grow: 1; background: rgba(255,255,255,0.1); border-radius: 10px; transition: 0.4s; }
+        .dot.active { background: var(--accent-color); box-shadow: 0 0 8px var(--accent-color); }
+        .dot.completed { background: rgba(255,255,255,0.4); }
+
+        .step { display: none; width: 100%; flex-direction: column; }
+        .step.active { display: flex; animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 22px; font-weight: 700; margin-bottom: 10px; text-align: center; line-height: 1.3; }
+        .description { font-size: 14px; color: var(--text-desc); margin-bottom: 25px; text-align: center; line-height: 1.5; }
+
+        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 100%; margin-top: 10px; }
+        .gender-card {
+            background: var(--card-bg); border-radius: 24px; padding: 25px 10px; border: 2px solid transparent;
+            cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 12px; transition: 0.3s;
+        }
+        .gender-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
+        .gender-card svg { width: 45px; height: 45px; fill: white; opacity: 0.9; }
+
+        .option-grid { display: grid; gap: 12px; width: 100%; margin-bottom: 20px; }
+        .option-card {
+            background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; transition: 0.2s; text-align: center; font-weight: 600;
+        }
+        .option-card.selected { border-color: var(--accent-light); background: var(--accent-color); }
+        .hint { display: block; font-size: 11px; opacity: 0.6; margin-top: 4px; font-weight: 400; }
+
+        .compact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-bottom: 15px; }
+        .compact-card {
+            background: var(--card-bg); padding: 14px 6px; border-radius: 16px; font-size: 12px; font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.05); cursor: pointer; text-align: center; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; min-height: 45px;
+        }
+        .compact-card.selected { border-color: var(--accent-light); background: var(--accent-color); }
+
+        textarea, input[type="text"] {
+            font-family: 'Comfortaa', sans-serif; width: 100%; background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 16px;
+            color: white; font-size: 14px; box-sizing: border-box; outline: none; text-align: center;
+            resize: none; transition: 0.2s;
+        }
+
+        .footer { width: 100%; margin-top: auto; padding: 20px 0; display: flex; gap: 12px; }
+        .main-btn {
+            font-family: 'Comfortaa', sans-serif; background: var(--accent-color); color: white; border: none;
+            flex-grow: 1; padding: 18px; border-radius: 22px; font-size: 15px; font-weight: 700; cursor: pointer;
+        }
+        .main-btn:disabled { background: var(--disabled); opacity: 0.5; }
+        .back-btn {
+            font-family: 'Comfortaa', sans-serif; background: var(--card-bg); color: white; border: 1px solid rgba(255,255,255,0.1);
+            width: 70px; border-radius: 22px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+
+        /* МОДАЛКИ */
+        .modal-overlay {
+            position: fixed; top:0; left:0; right:0; bottom:0; background: var(--modal-overlay);
+            backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 24px;
+        }
+        .modal {
+            background: #1e293b; padding: 30px 24px; border-radius: 28px; width: 100%; max-width: 320px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1);
+        }
+        .modal h2 { font-size: 20px; margin-top: 0; }
+        .modal-btns { display: flex; gap: 10px; margin-top: 25px; }
+        .modal-btn { flex: 1; padding: 14px; border-radius: 15px; border: none; font-family: 'Comfortaa'; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="progress-stepper" id="stepper">
+        <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    </div>
+
+    <div class="step active" id="step0">
+        <h1>Давай знакомиться</h1>
+        <div class="description">Как мне к тебе обращаться? (необязательно)</div>
+        <input type="text" id="user_name" placeholder="Твоё имя" 
+               onfocus="this.placeholder=''" onblur="this.placeholder='Твоё имя'"
+               oninput="updateName(); checkBtn(0)">
+        
+        <div class="description" style="margin-top: 25px;">Укажи свой пол</div>
+        <div class="gender-grid">
+            <div class="gender-card" id="g_male" onclick="setGender('male')">
+                <svg viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm9 7h-6v13h-2v-6h-2v6H9V9H3V7h18v2z"/></svg>
+                <b>Мужской</b>
+            </div>
+            <div class="gender-card" id="g_female" onclick="setGender('female')">
+                <svg viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm7 15l-3.5-10h-7L5 17h4v5h6v-5h4z"/></svg>
+                <b>Женский</b>
+            </div>
+        </div>
+        <div class="footer"><button class="main-btn" id="btn0" disabled onclick="nextStep(1)">Продолжить</button></div>
+    </div>
+
+    <div class="step" id="step1">
+        <h1>Твой фундамент</h1>
+        <div class="description">Что помогает тебе держать дисциплину?</div>
+        <div class="option-grid">
+            <div class="option-card" onclick="toggleSingle(this, 'faith', 'none')">
+                <span>Я иду своим путем</span>
+                <span class="hint">(без религиозного контекста)</span>
+            </div>
+            <div class="option-card" onclick="toggleSingle(this, 'faith', 'christian')">Христианство</div>
+            <div class="option-card" onclick="toggleSingle(this, 'faith', 'islam')">Ислам</div>
+            <div class="option-card" onclick="toggleSingle(this, 'faith', 'motivation')">
+                <span>Сила духа</span>
+                <span class="hint">(цитаты, мотивация и великие люди)</span>
+            </div>
+        </div>
+        <div class="footer"><div class="back-btn" onclick="prevStep(0)">←</div><button class="main-btn" id="btn1" disabled onclick="nextStep(2)">Далее</button></div>
+    </div>
+
+    <div class="step" id="step2">
+        <h1>Давай будем честны</h1>
+        <div class="description">Это останется только между нами.</div>
+        <div class="option-grid">
+            <div class="option-card" onclick="toggleSingle(this, 'status', 'active')">В активной борьбе</div>
+            <div class="option-card" onclick="toggleSingle(this, 'status', 'remission')">В ремиссии</div>
+            <div class="option-card" onclick="toggleSingle(this, 'status', 'none')">Зависимостей нет</div>
+        </div>
+        <div id="add_wrap" style="display:none; flex-direction:column; gap:10px; margin-top:10px;">
+            <input type="text" id="add_what" placeholder="Что именно?" onfocus="this.placeholder=''" onblur="this.placeholder='Что именно?'" oninput="checkBtn(2)">
+            <input type="text" id="add_how" placeholder="Как долго это длится?" onfocus="this.placeholder=''" onblur="this.placeholder='Как долго это длится?'" oninput="checkBtn(2)">
+        </div>
+        <div class="footer"><div class="back-btn" onclick="prevStep(1)">←</div><button class="main-btn" id="btn2" disabled onclick="nextStep(3)">Далее</button></div>
+    </div>
+
+    <div class="step" id="step3">
+        <h1>Твоё здоровье</h1>
+        <div class="description">Есть ли у тебя ограничения по нагрузкам?</div>
+        <div class="option-grid">
+            <div class="option-card" id="h_fine" onclick="handleHealth(false)">Ограничений нет</div>
+            <div class="option-card" id="h_issue" onclick="handleHealth(true)">Есть ограничения</div>
+        </div>
+        <textarea id="health_text" style="display:none; margin-top:10px; height: 100px;" 
+                  placeholder="Опиши травмы или болезни..." onfocus="this.placeholder=''" onblur="this.placeholder='Опиши травмы или болезни...'"
+                  oninput="checkBtn(3)"></textarea>
+        <div class="footer"><div class="back-btn" onclick="prevStep(2)">←</div><button class="main-btn" id="btn3" disabled onclick="nextStep(4)">Далее</button></div>
+    </div>
+
+    <div class="step" id="step4">
+        <h1>Твой ритм</h1>
+        <div class="description">Настроим график под твою жизнь.</div>
+        <div class="option-grid">
+            <div class="option-card" id="j_free" onclick="handleWork(false)">
+                <span class="gender-term" data-male="Полностью свободен" data-female="Полностью свободна">Полностью свободен</span>
+            </div>
+            <div class="option-card" id="j_busy" onclick="handleWork(true)">
+                <span class="gender-term" data-male="Занят" data-female="Занята">Занят</span>
+            </div>
+        </div>
+        <input type="text" id="work_hours" style="display:none; margin-top:10px;" 
+               placeholder="Часы работы (напр. 09:00 - 18:00)" onfocus="this.placeholder=''" onblur="this.placeholder='Часы работы (напр. 09:00 - 18:00)'"
+               oninput="checkBtn(4)">
+        <div class="footer"><div class="back-btn" onclick="prevStep(3)">←</div><button class="main-btn" id="btn4" disabled onclick="nextStep(5)">Далее</button></div>
+    </div>
+
+    <div class="step" id="step5">
+        <h1>Твоя кухня</h1>
+        <div class="description">Отметь всё, что можешь использовать.</div>
+        <div class="compact-grid">
+            <div class="compact-card" onclick="selectMulti(this, 'stove', 'kitchen')">Плита</div>
+            <div class="compact-card" onclick="selectMulti(this, 'oven', 'kitchen')">Духовка</div>
+            <div class="compact-card" onclick="selectMulti(this, 'airfryer', 'kitchen')">Аэрогриль</div>
+            <div class="compact-card" onclick="selectMulti(this, 'multicook', 'kitchen')">Мультиварка</div>
+            <div class="compact-card" onclick="selectMulti(this, 'microwave', 'kitchen')">Микроволновка</div>
+            <div class="compact-card" onclick="selectMulti(this, 'pan', 'kitchen')">Сковорода</div>
+            <div class="compact-card" onclick="selectMulti(this, 'pot', 'kitchen')">Кастрюля</div>
+            <div class="compact-card" onclick="selectMulti(this, 'blender', 'kitchen')">Блендер</div>
+            <div class="compact-card" onclick="selectMulti(this, 'scales', 'kitchen')">Весы</div>
+        </div>
+        <input type="text" id="k_custom" placeholder="Свой вариант..." 
+               onfocus="this.placeholder=''" onblur="this.placeholder='Свой вариант...'"
+               style="margin-top: 10px;" oninput="checkBtn(5)">
+        <div class="footer"><div class="back-btn" onclick="prevStep(4)">←</div><button class="main-btn" id="btn5" disabled onclick="validateKitchen()">Далее</button></div>
+    </div>
+
+    <div class="step" id="step6">
+        <h1>Твой инвентарь</h1>
+        <div class="description">Что у тебя есть для тренировок?</div>
+        <div class="compact-grid">
+            <div class="compact-card" onclick="selectMulti(this, 'gym', 'sport')">Трен. зал</div>
+            <div class="compact-card" onclick="selectMulti(this, 'dumbbells', 'sport')">Гантели</div>
+            <div class="compact-card" onclick="selectMulti(this, 'horizontal_bar', 'sport')">Турник</div>
+            <div class="compact-card" onclick="selectMulti(this, 'bars', 'sport')">Брусья</div>
+            <div class="compact-card" onclick="selectMulti(this, 'mat', 'sport')">Коврик</div>
+            <div class="compact-card" onclick="selectMulti(this, 'no_equip', 'sport')">Свой вес</div>
+        </div>
+        <input type="text" id="s_custom" placeholder="Что-то еще..." 
+               onfocus="this.placeholder=''" onblur="this.placeholder='Что-то еще...'"
+               style="margin-top: 10px;" oninput="checkBtn(6)">
+        <div class="footer"><div class="back-btn" onclick="prevStep(5)">←</div><button class="main-btn" id="btn6" disabled onclick="sendToBot()">Запустить</button></div>
+    </div>
+</div>
+
+<div id="modal1" class="modal-overlay">
+    <div class="modal">
+        <h2>А на чём готовить?</h2>
+        <p>Ты не <span class="gender-term" data-male="выбрал" data-female="выбрала">выбрал</span> базовую посуду. У тебя реально ничего нет?</p>
+        <div class="modal-btns">
+            <button class="modal-btn" onclick="secondCheck()" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);">Реально нет</button>
+            <button class="modal-btn" onclick="closeModal('modal1')" style="background: var(--accent-color); color: white;">Выбрать</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal2" class="modal-overlay">
+    <div class="modal">
+        <h2>Серьезно?</h2>
+        <p>Без посуды рацион будет слишком скудным. Найдёшь хотя бы кастрюлю?</p>
+        <div class="modal-btns">
+            <button class="modal-btn" onclick="forceNext()" style="background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);">Всё равно нет</button>
+            <button class="modal-btn" onclick="closeModal('modal2')" style="background: var(--accent-color); color: white;">Ладно, поищу</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+
+    let answers = { name: '', gender: '', faith: '', status: '', job: '', has_health: null, kitchen: [], sport: [] };
+
+    function updateName() { answers.name = document.getElementById('user_name').value.trim(); }
+
+    function setGender(val) {
+        answers.gender = val;
+        document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('g_' + val).classList.add('selected');
+        checkBtn(0);
+        applyGenderTexts();
+    }
+
+    function applyGenderTexts() {
+        const isF = answers.gender === 'female';
+        document.querySelectorAll('.gender-term').forEach(el => {
+            el.innerText = isF ? el.getAttribute('data-female') : el.getAttribute('data-male');
+        });
+    }
+
+    function toggleSingle(el, type, value) {
+        if (answers[type] === value) { answers[type] = ''; el.classList.remove('selected'); }
+        else {
+            el.parentElement.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected'); answers[type] = value;
+        }
+        if (type === 'status') document.getElementById('add_wrap').style.display = (value === 'active' || value === 'remission') ? 'flex' : 'none';
+        checkBtn(document.querySelector('.step.active').id.replace('step',''));
+    }
+
+    function handleWork(isB) {
+        answers.job = answers.job === (isB ? 'busy' : 'free') ? '' : (isB ? 'busy' : 'free');
+        document.getElementById('j_busy').classList.toggle('selected', answers.job === 'busy');
+        document.getElementById('j_free').classList.toggle('selected', answers.job === 'free');
+        document.getElementById('work_hours').style.display = answers.job === 'busy' ? 'block' : 'none';
+        checkBtn(4);
+    }
+
+    function handleHealth(has) {
+        answers.has_health = answers.has_health === has ? null : has;
+        document.getElementById('h_issue').classList.toggle('selected', answers.has_health === true);
+        document.getElementById('h_fine').classList.toggle('selected', answers.has_health === false);
+        document.getElementById('health_text').style.display = answers.has_health === true ? 'block' : 'none';
+        checkBtn(3);
+    }
+
+    function selectMulti(el, val, cat) {
+        el.classList.toggle('selected');
+        let a = (cat === 'kitchen') ? answers.kitchen : answers.sport;
+        let i = a.indexOf(val);
+        if (i > -1) a.splice(i, 1); else a.push(val);
+        checkBtn(cat === 'kitchen' ? 5 : 6);
+    }
+
+    function checkBtn(s) {
+        s = parseInt(s); let b = document.getElementById('btn' + s); if(!b) return;
+        if (s === 0) b.disabled = !answers.gender;
+        if (s === 1) b.disabled = !answers.faith;
+        if (s === 2) {
+            if (answers.status === 'none') b.disabled = false;
+            else if (answers.status) b.disabled = !document.getElementById('add_what').value;
+            else b.disabled = true;
+        }
+        if (s === 3) b.disabled = (answers.has_health === true && !document.getElementById('health_text').value) || answers.has_health === null;
+        if (s === 4) b.disabled = (answers.job === 'busy' && !document.getElementById('work_hours').value) || !answers.job;
+        if (s === 5) b.disabled = (answers.kitchen.length === 0 && !document.getElementById('k_custom').value.trim());
+        if (s === 6) b.disabled = (answers.sport.length === 0 && !document.getElementById('s_custom').value.trim());
+    }
+
+    function validateKitchen() {
+        const baseItems = ['stove', 'pan', 'pot'];
+        const hasBase = answers.kitchen.some(x => baseItems.includes(x));
+        if (!hasBase && !document.getElementById('k_custom').value.trim()) {
+            document.getElementById('modal1').style.display = 'flex';
+        } else {
+            nextStep(6);
+        }
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function secondCheck() { closeModal('modal1'); document.getElementById('modal2').style.display = 'flex'; }
+    function forceNext() { closeModal('modal2'); nextStep(6); }
+
+    function nextStep(s) {
+        document.querySelectorAll('.step').forEach(x => x.classList.remove('active'));
+        document.getElementById('step' + s).classList.add('active');
+        document.querySelectorAll('.dot').forEach((d, i) => {
+            d.classList.toggle('active', i === s);
+            d.classList.toggle('completed', i < s);
+        });
+        window.scrollTo(0,0);
+    }
+
+    function prevStep(s) { nextStep(s); }
+
+    function sendToBot() {
+        let data = {...answers, 
+            health_info: document.getElementById('health_text').value,
+            add_what: document.getElementById('add_what').value,
+            add_how: document.getElementById('add_how').value,
+            work_time: document.getElementById('work_hours').value,
+            k_custom: document.getElementById('k_custom').value,
+            s_custom: document.getElementById('s_custom').value
+        };
+        tg.sendData(JSON.stringify(data));
+        tg.close();
+    }
+</script>
+</body>
+</html>
