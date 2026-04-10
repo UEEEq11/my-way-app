@@ -40,6 +40,22 @@ main_menu = ReplyKeyboardMarkup(keyboard=[
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
+    timestamp = int(time.time())
+    # Ссылка теперь одна на всё приложение
+    web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={timestamp}"
+    
+    markup = ReplyKeyboardMarkup(keyboard=[
+        [KeyboardButton(text="🚀 Открыть My Way", web_app=WebAppInfo(url=web_app_url))]
+    ], resize_keyboard=True)
+    
+    await message.answer(
+        "Добро пожаловать в **My Way**! 💪\n\n"
+        "Твой персональный ИИ-тренер и диетолог прямо в Telegram.\n"
+        "Нажми кнопку ниже, чтобы начать путь к новой форме.",
+        reply_markup=markup,
+        parse_mode="Markdown"
+    )
+async def cmd_start(message: types.Message):
     # Анти-кэш: добавляем текущую секунду в ссылку
     timestamp = int(time.time())
     web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={timestamp}"
