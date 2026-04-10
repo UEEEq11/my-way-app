@@ -13,6 +13,7 @@
             --accent-color: #3b82f6;
             --text-main: #f8fafc;
             --text-desc: #cbd5e1;
+            --input-bg: #1e293b;
         }
 
         body {
@@ -25,49 +26,67 @@
 
         .container { padding: 20px; padding-bottom: 90px; }
 
-        /* ЭКРАНЫ */
+        /* ЭКРАНЫ ПРИЛОЖЕНИЯ */
         .page { display: none; animation: fadeIn 0.3s ease; }
         .page.active { display: block; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* ШАГИ АНКЕТЫ */
+        .step { display: none; flex-direction: column; gap: 15px; }
+        .step.active { display: flex; animation: fadeIn 0.3s ease; }
 
-        /* КАРТОЧКИ МЕНЮ */
-        .menu-card {
-            background: var(--card-bg); border-radius: 20px; padding: 20px;
-            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; gap: 15px; cursor: pointer;
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 24px; text-align: center; margin-bottom: 20px; }
+        .description { text-align: center; color: var(--text-desc); font-size: 14px; margin-bottom: 20px; }
+
+        input {
+            width: 100%; padding: 18px; background: var(--input-bg);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 18px;
+            color: white; font-size: 16px; box-sizing: border-box; outline: none; text-align: center;
         }
-        .menu-card h3 { margin: 0; font-size: 16px; }
-        .menu-card p { margin: 5px 0 0; font-size: 12px; color: var(--text-desc); }
-        .icon { font-size: 24px; }
+
+        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .gender-card {
+            background: var(--card-bg); border-radius: 20px; padding: 20px;
+            text-align: center; border: 2px solid transparent; cursor: pointer; transition: 0.3s;
+        }
+        .gender-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
+
+        .option-card {
+            background: var(--card-bg); padding: 18px; border-radius: 20px;
+            margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.1);
+            text-align: center; cursor: pointer;
+        }
+        .option-card.selected { background: var(--accent-color); border-color: white; }
+
+        .main-btn {
+            background: var(--accent-color); color: white; border: none;
+            padding: 18px; border-radius: 22px; width: 100%; font-weight: 700; font-size: 16px;
+            cursor: pointer; margin-top: 20px;
+        }
+        .main-btn:disabled { opacity: 0.5; }
 
         /* НИЖНЯЯ НАВИГАЦИЯ */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
-            height: 75px; background: rgba(15, 23, 42, 0.9);
+            height: 75px; background: rgba(15, 23, 42, 0.95);
             backdrop-filter: blur(15px);
             display: grid; grid-template-columns: repeat(3, 1fr);
-            border-top: 1px solid rgba(255,255,255,0.1);
-            z-index: 100;
+            border-top: 1px solid rgba(255,255,255,0.1); z-index: 100;
         }
         .nav-item {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; gap: 5px; font-size: 10px;
-            color: var(--text-desc); cursor: pointer; opacity: 0.6;
+            color: var(--text-desc); opacity: 0.6; cursor: pointer;
         }
         .nav-item.active { color: var(--accent-color); opacity: 1; }
 
-        /* СТИЛИ АНКЕТЫ (из прошлого шага) */
-        .step { display: none; flex-direction: column; }
-        .step.active { display: flex; }
-        input { 
-            width: 100%; padding: 15px; background: #1e293b; border: none; 
-            border-radius: 15px; color: white; margin-bottom: 10px; box-sizing: border-box;
+        /* КАРТОЧКИ ГЛАВНОГО ЭКРАНА */
+        .menu-item {
+            background: var(--card-bg); border-radius: 24px; padding: 20px;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 15px;
         }
-        .main-btn {
-            background: var(--accent-color); color: white; border: none;
-            padding: 18px; border-radius: 20px; width: 100%; font-weight: bold;
-        }
+        .icon-box { font-size: 28px; }
     </style>
 </head>
 <body>
@@ -75,82 +94,127 @@
 <div class="container">
     <div id="survey-page" class="page active">
         <h1>Твоя база</h1>
-        <div class="step active" id="step0">
-            <p>Как тебя зовут?</p>
-            <input type="text" id="user_name" placeholder="Имя">
-            <button class="main-btn" onclick="nextPage()">Начать</button>
+        
+        <div class="step active" id="s1">
+            <div class="description">Как мне к тебе обращаться?</div>
+            <input type="text" id="u_name" placeholder="Имя" oninput="checkS1()">
+            <div class="gender-grid">
+                <div class="gender-card" id="g_male" onclick="setG('male')">👨 Мужской</div>
+                <div class="gender-card" id="g_female" onclick="setG('female')">👩 Женский</div>
+            </div>
+            <button class="main-btn" id="b1" disabled onclick="nextS(2)">Далее</button>
+        </div>
+
+        <div class="step" id="s2">
+            <div class="description">Цифры для расчета ИМТ и калорий:</div>
+            <input type="number" id="u_age" placeholder="Возраст" oninput="checkS2()">
+            <input type="number" id="u_height" placeholder="Рост (см)" oninput="checkS2()">
+            <input type="number" id="u_weight" placeholder="Вес (кг)" oninput="checkS2()">
+            <button class="main-btn" id="b2" disabled onclick="nextS(3)">Далее</button>
+        </div>
+
+        <div id="s3" class="step">
+            <div class="description">Чего хочешь достичь?</div>
+            <div class="option-card" onclick="setGoal(this, 'weight_loss')">📉 Похудение</div>
+            <div class="option-card" onclick="setGoal(this, 'muscle_gain')">📈 Набор массы</div>
+            <div class="option-card" onclick="setGoal(this, 'keep_fit')">✨ Поддержание формы</div>
+            <button class="main-btn" id="b3" disabled onclick="finishSurvey()">Завершить</button>
         </div>
     </div>
 
     <div id="main-page" class="page">
-        <h1 id="welcome-user">Привет!</h1>
-        
-        <div class="menu-card">
-            <div class="icon">🏋️</div>
+        <h1 id="hi_user">Привет!</h1>
+        <div class="menu-item">
+            <div class="icon-box">🏋️</div>
             <div>
                 <h3>Тренировка дня</h3>
-                <p>ИИ подготовил план на сегодня</p>
+                <p>Нажми, чтобы начать</p>
             </div>
         </div>
-
-        <div class="menu-card">
-            <div class="icon">🥗</div>
+        <div class="menu-item">
+            <div class="icon-box">🥗</div>
             <div>
                 <h3>Питание</h3>
-                <p>Твои калории и БЖУ</p>
+                <p>Твой рацион на сегодня</p>
             </div>
         </div>
     </div>
 
     <div id="profile-page" class="page">
-        <h1>Профиль</h1>
-        <div class="menu-card">
-            <div id="profile-info">Загрузка данных...</div>
+        <h1>Твой Профиль</h1>
+        <div class="menu-item" style="flex-direction: column; align-items: flex-start;">
+            <div id="p_name">Загрузка...</div>
+            <div id="p_stats"></div>
         </div>
     </div>
 </div>
 
 <nav class="bottom-nav" id="bottom-nav" style="display: none;">
-    <div class="nav-item active" onclick="switchTab('main')">
-        <span>🏠</span><span>Главная</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('profile')">
-        <span>📊</span><span>Профиль</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('settings')">
-        <span>⚙️</span><span>Настройки</span>
-    </div>
+    <div class="nav-item active" onclick="tab('main')"><span>🏠</span><span>Главная</span></div>
+    <div class="nav-item" onclick="tab('profile')"><span>📊</span><span>Профиль</span></div>
+    <div class="nav-item" onclick="tab('settings')"><span>⚙️</span><span>Настройки</span></div>
 </nav>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    function nextPage() {
-        const name = document.getElementById('user_name').value;
-        if(!name) return alert("Введите имя");
-        
-        // Посылаем данные боту, но НЕ закрываем окно
-        tg.sendData(JSON.stringify({name: name, action: 'survey_done'}));
-        
-        // Переключаем интерфейс
+    let data = { name: '', gender: '', age: '', height: '', weight: '', goal: '' };
+
+    // Валидация
+    function setG(g) {
+        data.gender = g;
+        document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById('g_'+g).classList.add('selected');
+        checkS1();
+    }
+
+    function checkS1() {
+        data.name = document.getElementById('u_name').value;
+        document.getElementById('b1').disabled = !(data.name && data.gender);
+    }
+
+    function checkS2() {
+        data.age = document.getElementById('u_age').value;
+        data.height = document.getElementById('u_height').value;
+        data.weight = document.getElementById('u_weight').value;
+        document.getElementById('b2').disabled = !(data.age && data.height && data.weight);
+    }
+
+    function setGoal(el, g) {
+        data.goal = g;
+        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('b3').disabled = false;
+    }
+
+    function nextS(n) {
+        document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+        document.getElementById('s'+n).classList.add('active');
+    }
+
+    // Финиш анкеты
+    function finishSurvey() {
+        // Отправляем данные боту (action нужен для bot.py)
+        data.action = 'survey_done';
+        tg.sendData(JSON.stringify(data));
+
+        // Переключаем экран
         document.getElementById('survey-page').classList.remove('active');
         document.getElementById('main-page').classList.add('active');
         document.getElementById('bottom-nav').style.display = 'grid';
-        document.getElementById('welcome-user').innerText = `Привет, ${name}!`;
+        document.getElementById('hi_user').innerText = `Привет, ${data.name}!`;
+        
+        // Заполняем профиль сразу
+        document.getElementById('p_name').innerText = `Имя: ${data.name}`;
+        document.getElementById('p_stats').innerText = `Рост: ${data.height}см | Вес: ${data.weight}кг`;
     }
 
-    function switchTab(tab) {
+    function tab(name) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        
-        if(tab === 'main') {
-            document.getElementById('main-page').classList.add('active');
-            event.currentTarget.classList.add('active');
-        } else if(tab === 'profile') {
-            document.getElementById('profile-page').classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+        document.getElementById(name + '-page').classList.add('active');
+        event.currentTarget.classList.add('active');
     }
 </script>
 </body>
