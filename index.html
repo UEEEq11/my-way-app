@@ -21,102 +21,107 @@
             font-weight: 700;
             -webkit-tap-highlight-color: transparent;
             box-sizing: border-box;
-            outline: none !important; /* Убираем системные обводки */
+            outline: none !important;
         }
 
         body {
             background: var(--bg-gradient);
             color: var(--text-main);
             margin: 0; padding: 0;
-            min-height: 100vh; overflow: hidden;
+            min-height: 100vh; overflow-x: hidden;
         }
 
-        .container { padding: 25px; padding-bottom: 100px; }
+        .container { padding: 20px; padding-bottom: 100px; }
 
         .page { display: none; }
-        .page.active { display: block; }
+        .page.active { display: block; animation: pageIn 0.5s ease forwards; }
+        @keyframes pageIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
 
         .step { display: none; flex-direction: column; gap: 20px; }
         .step.active { display: flex; animation: stepFade 0.4s ease forwards; }
-
         @keyframes stepFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ОДНОРАЗОВАЯ ВОЛНА */
-        .title-wrapper { 
-            display: flex; justify-content: center; 
-            margin-bottom: 5px; min-height: 30px; 
-        }
-        .letter {
-            display: inline-block; font-size: 16px; text-transform: uppercase;
-            white-space: pre; opacity: 1;
-        }
+        /* ОДНОРАЗОВАЯ ВОЛНА ЗАГОЛОВКА */
+        .title-wrapper { display: flex; justify-content: center; margin-bottom: 5px; min-height: 30px; }
+        .letter { display: inline-block; font-size: 16px; text-transform: uppercase; white-space: pre; }
         .letter.animate { animation: jumpOnce 0.8s ease-out forwards; }
-
         @keyframes jumpOnce {
-            0% { transform: translateY(0); }
+            0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-8px); color: var(--accent-color); }
-            100% { transform: translateY(0); }
         }
 
         .main-slogan { text-align: center; color: var(--text-desc); font-size: 10px; font-weight: 400; opacity: 0.5; margin-bottom: 20px; letter-spacing: 1px; }
+        .step-pure-text { text-align: center; font-size: 13px; color: var(--text-desc); font-weight: 400; line-height: 1.5; margin-bottom: 25px; min-height: 40px; }
 
-        /* ЛАКОНИЧНЫЙ ТЕКСТ ШАГА */
-        .step-pure-text {
-            text-align: center; font-size: 13px; color: var(--text-desc);
-            font-weight: 400; line-height: 1.5; margin-bottom: 25px;
-            padding: 0 10px; min-height: 40px;
-        }
-
-        /* ИНПУТЫ БЕЗ МУСОРА */
-        input {
-            width: 100%; padding: 18px; background: var(--input-bg);
-            border: 1px solid rgba(255,255,255,0.08); border-radius: 18px;
-            color: white; font-size: 16px; text-align: center;
-            transition: border-color 0.3s;
-        }
+        /* ИНПУТЫ И АНКЕТА */
+        input { width: 100%; padding: 18px; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: white; font-size: 16px; text-align: center; transition: 0.3s; }
         input:focus { border-color: var(--accent-color); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .gender-card {
-            background: var(--card-bg); border-radius: 22px; padding: 30px 10px;
-            text-align: center; border: 1px solid transparent; cursor: pointer;
-            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center;
-        }
+        .gender-card { background: var(--card-bg); border-radius: 22px; padding: 30px 10px; text-align: center; border: 1px solid transparent; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
         .gender-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
-        .shape-svg { width: 60px; height: 80px; transition: 0.3s; }
+        .shape-svg { width: 60px; height: 80px; }
         .gender-label { margin-top: 12px; font-size: 10px; letter-spacing: 1px; color: var(--text-desc); }
 
-        .option-card {
-            background: var(--card-bg); padding: 18px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05); text-align: center; cursor: pointer; transition: 0.2s;
-        }
+        .option-card { background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; cursor: pointer; transition: 0.2s; }
         .option-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.2); }
 
         .btn-group { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 5px; }
-        .main-btn {
-            background: var(--accent-color); color: white; border: none;
-            padding: 18px; border-radius: 20px; font-size: 14px;
-            cursor: pointer; text-transform: uppercase;
-        }
-        .back-btn {
-            background: rgba(255,255,255,0.03); color: var(--text-desc); border: 1px solid rgba(255,255,255,0.08);
-            padding: 18px; border-radius: 20px; font-size: 13px; cursor: pointer;
-        }
+        .main-btn { background: var(--accent-color); color: white; border: none; padding: 18px; border-radius: 20px; font-size: 14px; cursor: pointer; text-transform: uppercase; }
+        .back-btn { background: rgba(255,255,255,0.03); color: var(--text-desc); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 20px; font-size: 13px; cursor: pointer; }
         .main-btn:disabled { opacity: 0.2; }
 
-        /* ПОЯСНЕНИЕ ИМТ */
-        .bmi-container { margin-top: 10px; text-align: center; animation: fadeIn 0.3s; }
-        .bmi-value { font-size: 14px; color: var(--accent-color); margin-bottom: 4px; }
-        .bmi-text { font-size: 11px; color: var(--text-desc); font-weight: 400; }
-
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            height: 70px; background: rgba(15, 23, 42, 0.98);
-            display: none; grid-template-columns: repeat(3, 1fr);
-            border-top: 1px solid rgba(255,255,255,0.05);
+        /* ИМТ БЛОК */
+        .bmi-container { 
+            margin-top: 15px; text-align: center; background: rgba(255, 255, 255, 0.03); 
+            padding: 15px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05); animation: fadeIn 0.4s ease;
         }
+        .bmi-value { font-size: 16px; color: var(--accent-color); margin-bottom: 8px; }
+        .bmi-status { font-size: 11px; padding: 4px 12px; border-radius: 10px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-low { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .status-good { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .status-warn { background: rgba(234, 179, 8, 0.2); color: #facc15; }
+        .status-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .bmi-text { font-size: 11px; color: var(--text-desc); font-weight: 400; margin-top: 10px; line-height: 1.4; }
+
+        /* DASHBOARD */
+        .dashboard { display: flex; flex-direction: column; gap: 20px; }
+        .status-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 28px; padding: 30px 20px; text-align: center;
+        }
+        .cal-ring {
+            width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 20px; position: relative;
+            display: flex; align-items: center; justify-content: center; flex-direction: column;
+            background: radial-gradient(closest-side, #020617 85%, transparent 85% 100%),
+                        conic-gradient(var(--accent-color) 75%, rgba(59, 130, 246, 0.1) 0);
+        }
+        .cal-ring span { font-size: 24px; font-weight: 700; color: var(--text-main); }
+        .cal-ring small { font-size: 9px; color: var(--text-desc); text-transform: uppercase; margin-top: 4px; }
+        .pfc-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .pfc-box { background: rgba(255,255,255,0.03); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .pfc-l { font-size: 9px; color: var(--text-desc); margin-bottom: 5px; }
+        .pfc-v { font-size: 13px; color: var(--accent-color); }
+        .section-title { font-size: 14px; margin: 10px 0 5px 5px; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
+        .daily-task {
+            background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+        }
+        .task-icon { width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        /* ТАБ-БАР */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
+            background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px);
+            display: none; grid-template-columns: repeat(3, 1fr);
+            border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text-desc); opacity: 0.5; }
+        .nav-item.active { opacity: 1; color: var(--accent-color); }
+        .nav-dot { width: 4px; height: 4px; background: var(--accent-color); border-radius: 50%; margin-top: 5px; display: none; }
+        .nav-item.active .nav-dot { display: block; }
     </style>
 </head>
 <body>
@@ -125,24 +130,17 @@
     <div id="survey-page" class="page active">
         <div class="title-wrapper" id="wave-title"></div>
         <div class="main-slogan">My Way — Твой путь</div>
-        
         <div class="step-pure-text" id="step-description"></div>
 
         <div class="step active" id="s1">
             <input type="text" id="u_name" placeholder="ИМЯ (НЕОБЯЗАТЕЛЬНО)">
             <div class="gender-grid">
                 <div class="gender-card" id="g_male" onclick="setG('male')">
-                    <svg class="shape-svg" viewBox="0 0 100 120">
-                        <circle cx="50" cy="25" r="20" fill="#00bfff"/>
-                        <path d="M15 55 L85 55 L50 115 Z" fill="#00bfff"/>
-                    </svg>
+                    <svg class="shape-svg" viewBox="0 0 100 120"><circle cx="50" cy="25" r="20" fill="#3b82f6"/><path d="M15 55 L85 55 L50 115 Z" fill="#3b82f6"/></svg>
                     <div class="gender-label">МУЖСКОЙ</div>
                 </div>
                 <div class="gender-card" id="g_female" onclick="setG('female')">
-                    <svg class="shape-svg" viewBox="0 0 100 120">
-                        <circle cx="50" cy="25" r="20" fill="#ff00ff"/>
-                        <path d="M50 55 L90 115 L10 115 Z" fill="#ff00ff"/>
-                    </svg>
+                    <svg class="shape-svg" viewBox="0 0 100 120"><circle cx="50" cy="25" r="20" fill="#f472b6"/><path d="M50 55 L90 115 L10 115 Z" fill="#f472b6"/></svg>
                     <div class="gender-label">ЖЕНСКИЙ</div>
                 </div>
             </div>
@@ -153,12 +151,7 @@
             <input type="number" id="u_age" placeholder="ВОЗРАСТ" oninput="checkS2()">
             <input type="number" id="u_height" placeholder="РОСТ (СМ)" oninput="checkS2()">
             <input type="number" id="u_weight" placeholder="ВЕС (КГ)" oninput="checkS2()">
-            
-            <div id="bmi_res" class="bmi-container" style="display:none;">
-                <div class="bmi-value" id="bmi_val"></div>
-                <div class="bmi-text" id="bmi_txt"></div>
-            </div>
-
+            <div id="bmi_res" class="bmi-container" style="display:none;"></div>
             <div class="btn-group">
                 <button class="back-btn" onclick="nextS(1)">НАЗАД</button>
                 <button class="main-btn" id="b2" disabled onclick="nextS(3)">ДАЛЕЕ</button>
@@ -177,20 +170,35 @@
     </div>
 
     <div id="main-page" class="page">
-        <h1 id="hi_user" style="text-align:center; margin-top:50px;">ПРИВЕТ</h1>
+        <div class="dashboard">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="hi_user" style="font-size:18px; margin:0;">ПРИВЕТ, АТЛЕТ</h2>
+                <div id="curr_date" style="font-size:11px; opacity:0.5; text-transform:uppercase;">СЕГОДНЯ</div>
+            </div>
+            <div class="status-card">
+                <div class="cal-ring"><span id="cal_left">0</span><small>ккал осталось</small></div>
+                <div class="pfc-row">
+                    <div class="pfc-box"><div class="pfc-l">БЕЛКИ</div><div class="pfc-v" id="p_v">0г</div></div>
+                    <div class="pfc-box"><div class="pfc-l">ЖИРЫ</div><div class="pfc-v" id="f_v">0г</div></div>
+                    <div class="pfc-box"><div class="pfc-l">УГЛЕВ</div><div class="pfc-v" id="c_v">0г</div></div>
+                </div>
+            </div>
+            <div class="section-title">План на день</div>
+            <div class="daily-task"><div class="task-icon">🔥</div><div><div style="font-size:14px;">Жиросжигающая</div><div style="font-size:11px; color:var(--text-desc); font-weight:400;">35 мин • 320 ккал</div></div></div>
+            <div class="daily-task"><div class="task-icon">🥗</div><div><div style="font-size:14px;">Завтрак</div><div style="font-size:11px; color:var(--text-desc); font-weight:400;">Овсянка с ягодами</div></div></div>
+        </div>
     </div>
 </div>
 
 <nav class="bottom-nav" id="bottom-nav">
-    <div style="display:flex; align-items:center; justify-content:center; font-size:10px; opacity:0.5;">ГЛАВНАЯ</div>
-    <div style="display:flex; align-items:center; justify-content:center; font-size:10px; opacity:0.5;">ПРОФИЛЬ</div>
-    <div style="display:flex; align-items:center; justify-content:center; font-size:10px; opacity:0.5;">НАСТРОЙКИ</div>
+    <div class="nav-item active"><span>ГЛАВНАЯ</span><div class="nav-dot"></div></div>
+    <div class="nav-item"><span>ПЛАН</span><div class="nav-dot"></div></div>
+    <div class="nav-item"><span>ПРОФИЛЬ</span><div class="nav-dot"></div></div>
 </nav>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-
     let data = { name: 'АТЛЕТ', gender: '', age: '', height: '', weight: '', goal: '' };
 
     const stepsText = {
@@ -222,21 +230,17 @@
         data.age = document.getElementById('u_age').value;
         data.height = document.getElementById('u_height').value;
         data.weight = document.getElementById('u_weight').value;
-        
         let resBox = document.getElementById('bmi_res');
         if(data.height > 100 && data.weight > 30) {
             let bmi = (data.weight / ((data.height/100)**2)).toFixed(1);
-            let txt = "";
-            if(bmi < 18.5) txt = "Дефицит массы тела. Нужно больше калорий.";
-            else if(bmi < 25) txt = "Нормальный вес. Отличный старт!";
-            else if(bmi < 30) txt = "Избыточный вес. Рекомендуем дефицит калорий.";
-            else txt = "Ожирение. Требуется строгий контроль рациона.";
-            
-            document.getElementById('bmi_val').innerText = `Твой ИМТ: ${bmi}`;
-            document.getElementById('bmi_txt').innerText = txt;
+            let st = "", d = "", cl = "";
+            if(bmi < 18.5) { st = "Дефицит"; d = "Нужно усиленное питание."; cl = "status-low"; }
+            else if(bmi < 25) { st = "Норма"; d = "Идеальный баланс для старта."; cl = "status-good"; }
+            else if(bmi < 30) { st = "Избыток"; d = "Подберем режим для коррекции."; cl = "status-warn"; }
+            else { st = "Ожирение"; d = "Сосредоточимся на дефиците."; cl = "status-danger"; }
+            resBox.innerHTML = `<div class="bmi-value">ИМТ: ${bmi}</div><span class="bmi-status ${cl}">${st}</span><div class="bmi-text">${d}</div>`;
             resBox.style.display = 'block';
         } else resBox.style.display = 'none';
-        
         document.getElementById('b2').disabled = !(data.age && data.height && data.weight);
     }
 
@@ -251,12 +255,21 @@
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
         document.getElementById('s'+n).classList.add('active');
         document.getElementById('step-description').innerText = stepsText[n];
-        runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ"); // Перезапуск волны при смене шага
+        runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
     }
 
     function finishSurvey() {
         let name = document.getElementById('u_name').value.trim();
         if(name) data.name = name;
+        let bmr = (10 * data.weight) + (6.25 * data.height) - (5 * data.age) + (data.gender === 'male' ? 5 : -161);
+        let tdee = Math.round(bmr * 1.375);
+        if(data.goal === 'weight_loss') tdee -= 400;
+        if(data.goal === 'muscle_gain') tdee += 400;
+        document.getElementById('cal_left').innerText = tdee;
+        document.getElementById('p_v').innerText = Math.round(data.weight * 2) + 'г';
+        document.getElementById('f_v').innerText = Math.round(data.weight * 0.9) + 'г';
+        document.getElementById('c_v').innerText = Math.round((tdee - (data.weight*2*4 + data.weight*0.9*9)) / 4) + 'г';
+        document.getElementById('curr_date').innerText = new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
         tg.sendData(JSON.stringify(data));
         document.getElementById('survey-page').classList.remove('active');
         document.getElementById('main-page').classList.add('active');
@@ -264,7 +277,6 @@
         document.getElementById('hi_user').innerText = `ПРИВЕТ, ${data.name.toUpperCase()}`;
     }
 
-    // Первый запуск
     runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
     document.getElementById('step-description').innerText = stepsText[1];
 </script>
