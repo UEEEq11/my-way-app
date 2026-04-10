@@ -14,303 +14,327 @@
             --text-main: #f8fafc;
             --text-desc: #cbd5e1;
             --input-bg: #1e293b;
+            --modal-bg: rgba(2, 6, 23, 0.98);
         }
 
-        * {
-            font-family: 'Comfortaa', sans-serif;
-            font-weight: 700;
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
-            outline: none !important;
+        * { font-family: 'Comfortaa', sans-serif; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { background: var(--bg-gradient); color: var(--text-main); margin: 0; min-height: 100vh; overflow-x: hidden; }
+        .container { padding: 20px; max-width: 420px; margin: 0 auto; padding-bottom: 60px; }
+
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .title-wrapper { display: flex; justify-content: center; margin-bottom: 10px; min-height: 30px; }
+        .letter { display: inline-block; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+        .letter.animate { animation: jumpOnce 0.6s ease-out; }
+        @keyframes jumpOnce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); color: var(--accent-color); } }
+
+        @keyframes clickPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
+            30% { transform: scale(0.95); box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.2); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
-        body {
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            margin: 0; padding: 0;
-            min-height: 100vh; overflow-x: hidden;
-        }
+        .card, .main-btn, .back-btn, .m-btn { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease; }
+        .anim-click { animation: clickPulse 0.4s forwards; }
+        .card:active, .main-btn:active, .back-btn:active { transform: scale(0.96); }
 
-        .container { padding: 20px; padding-bottom: 100px; }
+        .stepper { display: flex; gap: 6px; margin-bottom: 30px; }
+        .dot { height: 4px; flex: 1; background: rgba(255,255,255,0.1); border-radius: 10px; transition: 0.3s; }
+        .dot.active { background: var(--accent-color); }
+        .dot.done { background: rgba(255,255,255,0.4); }
 
-        .page { display: none; }
-        .page.active { display: block; animation: pageIn 0.5s ease forwards; }
-        @keyframes pageIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        .step-info { text-align: center; margin-bottom: 30px; }
+        .step-cat { font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: var(--accent-color); margin-bottom: 12px; font-weight: 700; }
+        .step-desc { font-size: 15px; font-weight: 400; color: var(--text-desc); line-height: 1.6; padding: 0 10px; }
 
-        .step { display: none; flex-direction: column; gap: 20px; }
-        .step.active { display: flex; animation: stepFade 0.4s ease forwards; }
-        @keyframes stepFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .title-wrapper { display: flex; justify-content: center; margin-bottom: 5px; min-height: 30px; }
-        .letter { display: inline-block; font-size: 16px; text-transform: uppercase; white-space: pre; }
-        .letter.animate { animation: jumpOnce 0.8s ease-out forwards; }
-        @keyframes jumpOnce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); color: var(--accent-color); }
-        }
-
-        .main-slogan { text-align: center; color: var(--text-desc); font-size: 10px; font-weight: 400; opacity: 0.5; margin-bottom: 20px; letter-spacing: 1px; }
-        .step-pure-text { text-align: center; font-size: 13px; color: var(--text-desc); font-weight: 400; line-height: 1.5; margin-bottom: 25px; min-height: 40px; }
-
-        input { width: 100%; padding: 18px; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: white; font-size: 16px; text-align: center; transition: 0.3s; }
-        input:focus { border-color: var(--accent-color); }
-
-        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .gender-card { background: var(--card-bg); border-radius: 22px; padding: 30px 10px; text-align: center; border: 1px solid transparent; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
-        .gender-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
-        .shape-svg { width: 60px; height: 80px; }
-        .gender-label { margin-top: 12px; font-size: 10px; letter-spacing: 1px; color: var(--text-desc); }
-
-        .option-card { background: var(--card-bg); padding: 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); text-align: center; cursor: pointer; transition: 0.2s; }
-        .option-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.2); }
-
-        .btn-group { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 5px; }
-        .main-btn { background: var(--accent-color); color: white; border: none; padding: 18px; border-radius: 20px; font-size: 14px; cursor: pointer; text-transform: uppercase; }
-        .back-btn { background: rgba(255,255,255,0.03); color: var(--text-desc); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 20px; font-size: 13px; cursor: pointer; }
-        .main-btn:disabled { opacity: 0.2; }
-
-        .bmi-container { 
-            margin-top: 15px; text-align: center; background: rgba(255, 255, 255, 0.03); 
-            padding: 15px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05); animation: fadeIn 0.4s ease;
-        }
-        .bmi-value { font-size: 16px; color: var(--accent-color); margin-bottom: 8px; }
-        .bmi-status { font-size: 11px; padding: 4px 12px; border-radius: 10px; display: inline-block; text-transform: uppercase; }
-        .status-low { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-        .status-good { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
-        .status-warn { background: rgba(234, 179, 8, 0.2); color: #facc15; }
-        .status-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-
-        .status-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%);
-            border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 28px; padding: 30px 20px; text-align: center;
-        }
-        .cal-ring {
-            width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 20px; position: relative;
-            display: flex; align-items: center; justify-content: center; flex-direction: column;
-            background: radial-gradient(closest-side, #020617 85%, transparent 85% 100%),
-                        conic-gradient(var(--accent-color) 75%, rgba(59, 130, 246, 0.1) 0);
-        }
-        .cal-ring span { font-size: 24px; color: var(--text-main); }
-        .pfc-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .pfc-box { background: rgba(255,255,255,0.03); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
-        .pfc-l { font-size: 9px; color: var(--text-desc); margin-bottom: 5px; }
-        .pfc-v { font-size: 13px; color: var(--accent-color); }
+        .step { display: none; flex-direction: column; gap: 15px; }
+        .step.active { display: flex; }
         
-        .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-
-        .bottom-nav {
-            position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
-            background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px);
-            display: none; grid-template-columns: repeat(3, 1fr);
-            border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;
+        /* КРУТАЯ АНИМАЦИЯ ДЛЯ БЛОКОВ ТЕКСТА */
+        .expand-box {
+            max-height: 0; opacity: 0; transform: translateY(-10px); overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, transform 0.4s ease;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text-desc); opacity: 0.5; cursor: pointer; }
-        .nav-item.active { opacity: 1; color: var(--accent-color); }
-        .nav-dot { width: 4px; height: 4px; background: var(--accent-color); border-radius: 50%; margin-top: 5px; display: none; }
-        .nav-item.active .nav-dot { display: block; }
+        .expand-box.show { max-height: 200px; opacity: 1; transform: translateY(0); margin-top: 10px; }
 
-        .section-title { font-size: 14px; margin: 20px 0 10px 5px; text-transform: uppercase; letter-spacing: 1px; }
-        .daily-task {
-            background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+        input { width: 100%; padding: 20px; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; color: white; font-size: 16px; text-align: center; user-select: text; }
+        textarea { width: 100%; padding: 20px; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; color: white; font-size: 16px; text-align: center; user-select: text; resize: none; overflow: hidden; min-height: 80px; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+        .card { 
+            background: var(--card-bg); border-radius: 24px; padding: 18px; text-align: center; 
+            border: 1px solid rgba(255,255,255,0.05); cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-        .task-icon { width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.15); box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .card b { font-size: 10px; text-transform: uppercase; display: block; }
+        .card span { font-size: 9px; color: var(--text-desc); font-weight: 400; margin-top: 6px; line-height: 1.3; }
+        
+        .shape-svg { width: 40px; height: 50px; margin-bottom: 10px; }
+
+        .btn-group { display: grid; grid-template-columns: 1fr 2.5fr; gap: 15px; margin-top: 25px; }
+        .main-btn { background: var(--accent-color); color: white; border: none; padding: 20px; border-radius: 20px; font-size: 14px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
+        .main-btn:disabled { opacity: 0.2; transform: none; }
+        .back-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white; }
+
+        .bmi-box { padding: 18px; border-radius: 20px; text-align: center; font-size: 13px; display: none; margin-top: 10px; font-weight: 700; }
+        .bmi-1 { background: #1e3a8a; color: #60a5fa; border: 1px solid #3b82f6; }
+        .bmi-2 { background: #064e3b; color: #4ade80; border: 1px solid #10b981; }
+        .bmi-3 { background: #78350f; color: #fbbf24; border: 1px solid #f59e0b; }
+        .bmi-4 { background: #7f1d1d; color: #f87171; border: 1px solid #ef4444; }
+
+        /* МОДАЛКИ (Пофиксены) */
+        .modal { position: fixed; inset: 0; background: var(--modal-bg); z-index: 100; display: none; align-items: center; justify-content: center; padding: 30px; }
+        .modal-content { text-align: center; background: #1e293b; padding: 30px; border-radius: 30px; border: 1px solid var(--accent-color); width: 100%; max-width: 340px; }
+        .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
+        .m-btn { background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); padding: 18px; border-radius: 18px; font-size: 12px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
+        .m-yes { background: var(--accent-color); border: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="survey-page" class="page active">
-        <div class="title-wrapper" id="wave-title"></div>
-        <div class="main-slogan">My Way — Твой путь</div>
-        <div class="step-pure-text" id="step-description"></div>
-
-        <div class="step active" id="s1">
-            <input type="text" id="u_name" placeholder="ИМЯ (НЕОБЯЗАТЕЛЬНО)">
-            <div class="gender-grid">
-                <div class="gender-card" id="g_male" onclick="setG('male')">
-                    <svg class="shape-svg" viewBox="0 0 100 120"><circle cx="50" cy="25" r="20" fill="#3b82f6"/><path d="M15 55 L85 55 L50 115 Z" fill="#3b82f6"/></svg>
-                    <div class="gender-label">МУЖСКОЙ</div>
-                </div>
-                <div class="gender-card" id="g_female" onclick="setG('female')">
-                    <svg class="shape-svg" viewBox="0 0 100 120"><circle cx="50" cy="25" r="20" fill="#f472b6"/><path d="M50 55 L90 115 L10 115 Z" fill="#f472b6"/></svg>
-                    <div class="gender-label">ЖЕНСКИЙ</div>
-                </div>
-            </div>
-            <button class="main-btn" id="b1" disabled onclick="nextS(2)">ДАЛЕЕ</button>
-        </div>
-
-        <div class="step" id="s2">
-            <input type="number" id="u_age" placeholder="ВОЗРАСТ" oninput="checkS2()">
-            <input type="number" id="u_height" placeholder="РОСТ (СМ)" oninput="checkS2()">
-            <input type="number" id="u_weight" placeholder="ВЕС (КГ)" oninput="checkS2()">
-            <div id="bmi_res" class="bmi-container" style="display:none;"></div>
-            <div class="btn-group">
-                <button class="back-btn" onclick="nextS(1)">НАЗАД</button>
-                <button class="main-btn" id="b2" disabled onclick="nextS(3)">ДАЛЕЕ</button>
-            </div>
-        </div>
-
-        <div id="s3" class="step">
-            <div class="option-card" onclick="setGoal(this, 'weight_loss')">ПОХУДЕНИЕ</div>
-            <div class="option-card" onclick="setGoal(this, 'muscle_gain')">НАБОР МАССЫ</div>
-            <div class="option-card" onclick="setGoal(this, 'keep_fit')">ПОДДЕРЖАНИЕ ФОРМЫ</div>
-            <div class="btn-group">
-                <button class="back-btn" onclick="nextS(2)">НАЗАД</button>
-                <button class="main-btn" id="b3" disabled onclick="finishSurvey()">ГОТОВО</button>
-            </div>
-        </div>
+    <div class="title-wrapper" id="wave-title"></div>
+    <div class="stepper" id="stepper"></div>
+    <div class="step-info">
+        <div class="step-cat" id="step-cat"></div>
+        <div class="step-desc" id="step-desc"></div>
     </div>
 
-    <div id="main-page" class="page">
-        <div id="tab-home" class="tab-content active">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2 id="hi_user" style="font-size:18px; margin:0;">ПРИВЕТ, АТЛЕТ</h2>
-                <div id="curr_date" style="font-size:11px; opacity:0.5; text-transform:uppercase;"></div>
+    <div class="step active" id="s0">
+        <input type="text" id="u_name" placeholder="Твое имя">
+        <div class="grid-2">
+            <div class="card" id="g_male" onclick="setG('male')">
+                <svg class="shape-svg" viewBox="0 0 100 120"><circle cx="50" cy="25" r="20" fill="#3b82f6"/><path d="M15 55 L85 55 L50 115 Z" fill="#3b82f6"/></svg>
+                <b>МУЖСКОЙ</b>
             </div>
-            <div class="status-card">
-                <div class="cal-ring"><span id="cal_left">0</span><small style="font-size:9px; opacity:0.6;">ккал</small></div>
-                <div class="pfc-row">
-                    <div class="pfc-box"><div class="pfc-l">БЕЛКИ</div><div class="pfc-v" id="p_v">0г</div></div>
-                    <div class="pfc-box"><div class="pfc-l">ЖИРЫ</div><div class="pfc-v" id="f_v">0г</div></div>
-                    <div class="pfc-box"><div class="pfc-l">УГЛЕВ</div><div class="pfc-v" id="c_v">0г</div></div>
-                </div>
+            <div class="card" id="g_female" onclick="setG('female')">
+                <svg class="shape-svg" viewBox="0 0 100 120"><circle cx="50" cy="25" r="20" fill="#f472b6"/><path d="M50 55 L90 115 L10 115 Z" fill="#f472b6"/></svg>
+                <b>ЖЕНСКИЙ</b>
             </div>
-            <div class="section-title">План на день</div>
-            <div class="daily-task"><div class="task-icon">🔥</div><div><div style="font-size:14px;">Основная тренировка</div><div style="font-size:11px; color:var(--text-desc);">Нажми, чтобы открыть</div></div></div>
         </div>
+        <button class="main-btn" id="b0" disabled onclick="handleNext(0, 1)">ДАЛЕЕ</button>
+    </div>
 
-        <div id="tab-profile" class="tab-content">
-            <h2 style="font-size:18px;">ПРОФИЛЬ</h2>
-            <div class="status-card" style="text-align:left; line-height:2;" id="prof_data"></div>
-            <button class="back-btn" style="width:100%; margin-top:20px; color:#f87171; border-color:rgba(239,68,68,0.2);" onclick="hardReset()">СБРОСИТЬ ДАННЫЕ</button>
+    <div class="step" id="s1">
+        <div class="card" onclick="setV('faith','none',this,1)"><b>СВОЙ ПУТЬ</b><span>Личные убеждения</span></div>
+        <div class="card" onclick="setV('faith','ortho',this,1)"><b>ПРАВОСЛАВИЕ</b><span>Посты и каноны</span></div>
+        <div class="card" onclick="setV('faith','catholic',this,1)"><b>КАТОЛИЦИЗМ</b><span>Традиции</span></div>
+        <div class="card" onclick="setV('faith','islam',this,1)"><b>ИСЛАМ</b><span>Халяль и молитвы</span></div>
+        <div class="btn-group"><div class="back-btn" onclick="handleBack(1, 0)">←</div><button class="main-btn" id="b1" disabled onclick="handleNext(1, 2)">ДАЛЕЕ</button></div>
+    </div>
+
+    <div class="step" id="s2">
+        <input type="number" id="u_age" placeholder="Возраст" oninput="checkBMI()">
+        <input type="number" id="u_height" placeholder="Рост (см)" oninput="checkBMI()">
+        <input type="number" id="u_weight" placeholder="Вес (кг)" oninput="checkBMI()">
+        <div id="bmi_res" class="bmi-box"></div>
+        <div class="btn-group"><div class="back-btn" onclick="handleBack(2, 1)">←</div><button class="main-btn" id="b2" disabled onclick="handleNext(2, 3)">ДАЛЕЕ</button></div>
+    </div>
+
+    <div class="step" id="s3">
+        <div class="card" onclick="setDep('none', this)"><b>НЕТ</b><span>Без зависимостей</span></div>
+        <div class="card" onclick="setDep('active', this)"><b>В БОРЬБЕ</b><span>Нужна поддержка</span></div>
+        <div class="card" onclick="setDep('remission', this)"><b>В РЕМИССИИ</b><span>Движение вперед</span></div>
+        <div id="dep_wrap" class="expand-box">
+            <textarea id="dep_info" placeholder="Опиши подробнее..." oninput="autoH(this); checkS3()"></textarea>
+        </div>
+        <div class="btn-group"><div class="back-btn" onclick="handleBack(3, 2)">←</div><button class="main-btn" id="b3" disabled onclick="handleNext(3, 4)">ДАЛЕЕ</button></div>
+    </div>
+
+    <div class="step" id="s4">
+        <div class="card" id="h_no" onclick="setH(false, this)"><b>ЗДОРОВ</b><span>Без ограничений</span></div>
+        <div class="card" id="h_yes" onclick="setH(true, this)"><b>ТРАВМЫ</b><span>Нужна коррекция</span></div>
+        <div id="h_wrap" class="expand-box">
+            <textarea id="h_desc" placeholder="Какие ограничения?" oninput="autoH(this); checkS4()"></textarea>
+        </div>
+        <div class="btn-group"><div class="back-btn" onclick="handleBack(4, 3)">←</div><button class="main-btn" id="b4" disabled onclick="handleNext(4, 5)">ДАЛЕЕ</button></div>
+    </div>
+
+    <div class="step" id="s5">
+        <div class="grid-3">
+            <div class="card" onclick="toggleK(this,'stove')"><b>ПЛИТА</b></div>
+            <div class="card" onclick="toggleK(this,'pan')"><b>СКОВОРОДА</b></div>
+            <div class="card" onclick="toggleK(this,'pot')"><b>КАСТРЮЛЯ</b></div>
+            <div class="card" onclick="toggleK(this,'oven')"><b>ДУХОВКА</b></div>
+            <div class="card" onclick="toggleK(this,'air')"><b>АЭРОГРИЛЬ</b></div>
+            <div class="card" onclick="toggleK(this,'micro')"><b>МИКРО-В</b></div>
+            <div class="card" onclick="toggleK(this,'multi')"><b>МУЛЬТИ-В</b></div>
+            <div class="card" onclick="toggleK(this,'egrill')"><b>ЭЛ.ГРИЛЬ</b></div>
+            <div class="card" onclick="toggleK(this,'blender')"><b>БЛЕНДЕР</b></div>
+        </div>
+        <input type="text" id="k_custom" placeholder="Другая техника..." style="margin-top: 10px;">
+        <div class="btn-group"><div class="back-btn" onclick="handleBack(5, 4)">←</div><button class="main-btn" id="b5" onclick="checkK(this)">ДАЛЕЕ</button></div>
+    </div>
+
+    <div class="step" id="s6">
+        <div class="grid-3">
+            <div class="card" onclick="toggleS(this,'gym')"><b>ЗАЛ</b></div>
+            <div class="card" onclick="toggleS(this,'street')"><b>ТУРНИК</b></div>
+            <div class="card" onclick="toggleS(this,'dumb')"><b>ГАНТЕЛИ</b></div>
+            <div class="card" onclick="toggleS(this,'bands')"><b>РЕЗИНКИ</b></div>
+            <div class="card" onclick="toggleS(this,'rope')"><b>СКАКАЛКА</b></div>
+            <div class="card" onclick="toggleS(this,'weight')"><b>СВОЙ ВЕС</b></div>
+        </div>
+        <input type="text" id="s_custom" placeholder="Свой инвентарь..." style="margin-top: 10px;">
+        <div class="btn-group"><div class="back-btn" onclick="handleBack(6, 5)">←</div><button class="main-btn" id="b6" onclick="handleFinish(this)">ЗАПУСТИТЬ</button></div>
+    </div>
+</div>
+
+<div class="modal" id="m1">
+    <div class="modal-content">
+        <p>Для базы питания желательно иметь плиту и сковорода. У тебя точно их нет?</p>
+        <div class="modal-btns">
+            <div class="m-btn" onclick="playClickAnim(this); closeM('m1')">ЕСТЬ</div>
+            <div class="m-btn m-yes" onclick="playClickAnim(this); closeM('m1'); showM('m2')">НЕТ</div>
+        </div>
+    </div>
+</div>
+<div class="modal" id="m2">
+    <div class="modal-content">
+        <p>План будет адаптирован под готовку без плиты. Продолжаем?</p>
+        <div class="modal-btns">
+            <div class="m-btn" onclick="playClickAnim(this); closeM('m2')">СТОЙ</div>
+            <div class="m-btn m-yes" onclick="playClickAnim(this); nextS(6); closeM('m2')">ДА</div>
         </div>
     </div>
 </div>
 
-<nav class="bottom-nav" id="bottom-nav">
-    <div class="nav-item active" onclick="switchTab('home', this)"><span>ГЛАВНАЯ</span><div class="nav-dot"></div></div>
-    <div class="nav-item"><span>ПЛАН</span><div class="nav-dot"></div></div>
-    <div class="nav-item" onclick="switchTab('profile', this)"><span>ПРОФИЛЬ</span><div class="nav-dot"></div></div>
-</nav>
-
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-    
-    // ПРОВЕРКА СОХРАНЕНИЯ
-    let saved = localStorage.getItem('user_data');
-    let data = saved ? JSON.parse(saved) : { name: 'АТЛЕТ', gender: '', age: '', height: '', weight: '', goal: '' };
+    let data = { name: '', gender: 'male', kitchen: [], sport: [], faith: '', health: null };
 
-    const stepsText = {
-        1: "Выбери пол и введи имя, чтобы начать путь.",
-        2: "Укажи актуальные параметры тела для точного расчета программы.",
-        3: "Выбери цель, которой хочешь достичь в ближайшее время."
-    };
+    const steps = [
+        { cat: "КТО ТЫ?", desc: "Укажи имя или мы возьмем его из Telegram." },
+        { cat: "ВЕРА", desc: "Настроим рацион под твои убеждения." },
+        { cat: "ТЕЛО", desc: "Данные для расчета нормы калорий и ИМТ." },
+        { cat: "ЧЕСТНОСТЬ", desc: "Зависимости влияют на восстановление." },
+        { cat: "ЗДОРОВЬЕ", desc: "Травмы — критичный фактор для нагрузок." },
+        { cat: "КУХНЯ", desc: "Что из техники у тебя есть под рукой?" },
+        { cat: "СПОРТ", desc: "С чем ты планируешь тренироваться?" }
+    ];
 
-    function runWaveEffect(text) {
-        const wrapper = document.getElementById('wave-title');
-        if(!wrapper) return;
-        wrapper.innerHTML = '';
-        text.split('').forEach((char, i) => {
-            const span = document.createElement('span');
-            span.innerText = char;
-            span.className = 'letter animate';
-            span.style.animationDelay = `${i * 0.05}s`;
-            wrapper.appendChild(span);
+    function playClickAnim(el) {
+        if(!el) return;
+        el.classList.remove('anim-click');
+        void el.offsetWidth; 
+        el.classList.add('anim-click');
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function autoH(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+    function runWave() {
+        const w = document.getElementById('wave-title'); w.innerHTML = '';
+        "MY WAY — ТВОЙ ПУТЬ".split('').forEach((char, i) => {
+            const s = document.createElement('span'); s.innerText = char === ' ' ? '\u00A0' : char;
+            s.className = 'letter animate'; s.style.animationDelay = `${i * 0.05}s`; w.appendChild(s);
         });
     }
 
-    function setG(g) {
-        data.gender = g;
-        document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'));
-        document.getElementById('g_'+g).classList.add('selected');
-        document.getElementById('b1').disabled = false;
+    function setG(g) { 
+        playClickAnim(document.getElementById('g_'+g));
+        data.gender = g; 
+        document.querySelectorAll('#s0 .card').forEach(c => c.classList.remove('selected')); 
+        document.getElementById('g_'+g).classList.add('selected'); 
+        document.getElementById('b0').disabled = false; 
     }
 
-    function checkS2() {
-        data.age = document.getElementById('u_age').value;
-        data.height = document.getElementById('u_height').value;
-        data.weight = document.getElementById('u_weight').value;
-        let resBox = document.getElementById('bmi_res');
-        if(data.height > 100 && data.weight > 30) {
-            let bmi = (data.weight / ((data.height/100)**2)).toFixed(1);
-            let st = "", cl = "";
-            if(bmi < 18.5) { st = "Дефицит"; cl = "status-low"; }
-            else if(bmi < 25) { st = "Норма"; cl = "status-good"; }
-            else if(bmi < 30) { st = "Избыток"; cl = "status-warn"; }
-            else { st = "Ожирение"; cl = "status-danger"; }
-            resBox.innerHTML = `<div class="bmi-value">ИМТ: ${bmi}</div><span class="bmi-status ${cl}">${st}</span>`;
-            resBox.style.display = 'block';
-        } else resBox.style.display = 'none';
-        document.getElementById('b2').disabled = !(data.age && data.height && data.weight);
+    function setV(k, v, el, s) { 
+        playClickAnim(el);
+        data[k] = v; 
+        el.parentElement.querySelectorAll('.card').forEach(c => c.classList.remove('selected')); 
+        el.classList.add('selected'); 
+        document.getElementById('b'+s).disabled = false; 
     }
 
-    function setGoal(el, g) {
-        data.goal = g;
-        document.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
-        el.classList.add('selected');
-        document.getElementById('b3').disabled = false;
+    function checkBMI() {
+        let h = document.getElementById('u_height').value, w = document.getElementById('u_weight').value, age = document.getElementById('u_age').value, r = document.getElementById('bmi_res');
+        if(h > 50 && w > 20) {
+            let bmi = (w / ((h/100)**2)).toFixed(1); r.style.display = 'block';
+            let status = (bmi < 18.5) ? "ДЕФИЦИТ" : (bmi < 25) ? "НОРМА" : (bmi < 30) ? "ИЗБЫТОК" : "ОЖИРЕНИЕ";
+            r.className = 'bmi-box ' + (bmi < 18.5 ? 'bmi-1' : bmi < 25 ? 'bmi-2' : bmi < 30 ? 'bmi-3' : 'bmi-4');
+            r.innerText = `ИМТ: ${bmi} — ${status}`;
+            document.getElementById('b2').disabled = !(age && h && w);
+        } else r.style.display = 'none';
     }
+
+    function setDep(t, el) { 
+        playClickAnim(el);
+        data.dep_type = t; 
+        document.querySelectorAll('#s3 .card').forEach(c => c.classList.remove('selected')); 
+        el.classList.add('selected'); 
+        document.getElementById('dep_wrap').classList.toggle('show', t !== 'none'); 
+        checkS3(); 
+    }
+    
+    function checkS3() { 
+        let btn = document.getElementById('b3');
+        btn.disabled = (data.dep_type !== 'none' && document.getElementById('dep_info').value.trim().length < 3); 
+        if(data.dep_type === 'none') btn.disabled = false; 
+    }
+
+    function setH(v, el) { 
+        playClickAnim(el);
+        data.health = v; 
+        document.getElementById('h_yes').classList.toggle('selected', v); 
+        document.getElementById('h_no').classList.toggle('selected', !v); 
+        document.getElementById('h_wrap').classList.toggle('show', v); 
+        checkS4(); 
+    }
+    
+    function checkS4() { 
+        document.getElementById('b4').disabled = (data.health === null) || (data.health && !document.getElementById('h_desc').value.trim()); 
+    }
+
+    function toggleK(el, v) { 
+        playClickAnim(el);
+        el.classList.toggle('selected'); 
+        let i = data.kitchen.indexOf(v); if(i > -1) data.kitchen.splice(i,1); else data.kitchen.push(v); 
+    }
+    
+    function checkK(btn) { 
+        playClickAnim(btn);
+        const base = ['stove', 'pan']; 
+        if(!base.every(i => data.kitchen.includes(i))) showM('m1'); 
+        else nextS(6); 
+    }
+
+    function toggleS(el, v) { 
+        playClickAnim(el);
+        el.classList.toggle('selected'); 
+        let i = data.sport.indexOf(v); if(i > -1) data.sport.splice(i,1); else data.sport.push(v); 
+    }
+
+    function handleNext(curr, next) { playClickAnim(document.getElementById('b'+curr)); nextS(next); }
+    function handleBack(curr, prev) { playClickAnim(document.querySelector('#s'+curr+' .back-btn')); nextS(prev); }
+
+    function showM(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeM(id) { document.getElementById(id).style.display = 'none'; }
 
     function nextS(n) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
         document.getElementById('s'+n).classList.add('active');
-        document.getElementById('step-description').innerText = stepsText[n];
-        runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
+        document.getElementById('step-cat').innerText = steps[n].cat;
+        document.getElementById('step-desc').innerText = steps[n].desc;
+        const ds = document.getElementById('stepper'); ds.innerHTML = '';
+        steps.forEach((_, i) => ds.innerHTML += `<div class="dot ${i===n?'active':(i<n?'done':'')}"></div>`);
+        runWave();
+        window.scrollTo(0,0);
     }
 
-    function switchTab(tab, el) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-        document.getElementById('tab-'+tab).classList.add('active');
-        el.classList.add('active');
-    }
-
-    function hardReset() {
-        if(confirm("Сбросить все данные?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
-
-    function finishSurvey() {
-        let nameIn = document.getElementById('u_name').value.trim();
-        if(nameIn) data.name = nameIn;
-        
+    function handleFinish(btn) {
+        playClickAnim(btn);
+        data.name = document.getElementById('u_name').value.trim() || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "АТЛЕТ");
         localStorage.setItem('user_data', JSON.stringify(data));
-
-        let bmr = (10 * data.weight) + (6.25 * data.height) - (5 * data.age) + (data.gender === 'male' ? 5 : -161);
-        let tdee = Math.round(bmr * 1.375);
-        if(data.goal === 'weight_loss') tdee -= 400;
-        if(data.goal === 'muscle_gain') tdee += 400;
-
-        document.getElementById('cal_left').innerText = tdee;
-        document.getElementById('p_v').innerText = Math.round(data.weight * 2) + 'г';
-        document.getElementById('f_v').innerText = Math.round(data.weight * 0.9) + 'г';
-        document.getElementById('c_v').innerText = Math.round((tdee - (data.weight*2*4 + data.weight*0.9*9)) / 4) + 'г';
-        document.getElementById('curr_date').innerText = new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
-        
-        document.getElementById('prof_data').innerHTML = `
-            ИМЯ: ${data.name.toUpperCase()}<br>
-            РОСТ: ${data.height} СМ<br>
-            ВЕС: ${data.weight} КГ<br>
-            ЦЕЛЬ: ${data.goal === 'muscle_gain' ? 'НАБОР МАССЫ' : data.goal === 'weight_loss' ? 'ПОХУДЕНИЕ' : 'ПОДДЕРЖАНИЕ'}`;
-
-        document.getElementById('survey-page').style.display = 'none';
-        document.getElementById('main-page').classList.add('active');
-        document.getElementById('bottom-nav').style.display = 'grid';
-        document.getElementById('hi_user').innerText = `ПРИВЕТ, ${data.name.toUpperCase()}`;
+        alert('Данные сохранены!');
     }
 
-    // ЛОГИКА АВТОВХОДА
-    if(saved) {
-        finishSurvey();
-    } else {
-        runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
-        document.getElementById('step-description').innerText = stepsText[1];
-    }
+    nextS(0);
 </script>
 </body>
 </html>
