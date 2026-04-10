@@ -4,7 +4,7 @@ import os
 import time
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardRemove
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardRemove, FSInputFile
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import insert, MetaData, Table, Column, Integer, String, BigInteger, Float
 from dotenv import load_dotenv
@@ -29,47 +29,75 @@ users_table = Table('users', metadata,
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
+# Словарь для хранения ID последнего "вечного" сообщения для каждого юзера
+last_main_message = {}
+
 async def delete_message_after(chat_id: int, message_id: int, delay: int):
-    """Фоновая задача для удаления сообщения через заданное время"""
     await asyncio.sleep(delay)
     try:
         await bot.delete_message(chat_id, message_id)
     except Exception:
-        pass # Сообщение уже удалено
+        pass
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
-    # Генерируем ссылку с таймстампом против кэша
+    user_id = message.from_user.id
     timestamp = int(time.time())
     web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={timestamp}"
     
-    # СИНЯЯ КНОПКА ПОД СООБЩЕНИЕМ
-    markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💎 ВОЙТИ В MY WAY", web_app=WebAppInfo(url=web_app_url))]
-    ])
-    
-    # 1. Удаляем старую большую кнопку снизу экрана (если она была)
-    clean_kb = await message.answer("Обновление интерфейса...", reply_markup=ReplyKeyboardRemove())
-    asyncio.create_task(delete_message_after(message.chat.id, clean_kb.message_id, 3)) # Удалим через 3 сек
+    # 1. Удаляем ПРЕДЫДУЩЕЕ главное сообщение, если оно было
+    if user_id in last_main_message:
+        try:
+            await bot.delete_message(message.chat.id, last_main_message[user_id])
+        except Exception:
+            pass
 
-    # 2. Удаляем команду /start от юзера, чтобы не мусорить в чате
-    asyncio.create_task(delete_message_after(message.chat.id, message.message_id, 3))
+    # 2. Убираем старую серую кнопку внизу (ReplyKeyboardRemove)
+    temp_msg = await message.answer("Обновление интерфейса...", reply_markup=ReplyKeyboardRemove())
+    asyncio.create_task(delete_message_after(message.chat.id, temp_msg.message_id, 3))
     
-    # 3. Отправляем ГЛАВНОЕ сообщение, которое останется в чате
-    await message.answer(
-        "👋 **Добро пожаловать в твой личный кабинет My Way.**\n\n"
-        "Здесь нет лишнего шума — только твой прогресс.\n"
-        "Используй кнопку ниже для доступа к приложению.",
-        reply_markup=markup,
-        parse_mode="Markdown"
+    # 3. Удаляем саму команду /start от юзера
+    asyncio.create_task(delete_message_after(message.chat.id, message.message_id, 3))
+
+    # Настройка кнопки
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💎 ОТКРЫТЬ MY WAY", web_app=WebAppInfo(url=web_app_url))]
+    ])
+
+    caption_text = (
+        "✨ **MY WAY — ТВОЙ ЛИЧНЫЙ ПУТЬ**\n\n"
+        "Твой прогресс не терпит суеты. Мы подготовили всё для твоей трансформации в одном приложении.\n\n"
+        "📊 **Доступные модули:**\n"
+        "├ Контроль КБЖУ и веса\n"
+        "├ Тренировочные сплиты\n"
+        "└ Аналитика активности\n\n"
+        "🚀 *Нажми кнопку ниже, чтобы войти:*"
     )
+
+    # 4. Отправляем новое "вечное" сообщение (с фото или без)
+    new_msg = None
+    if os.path.exists("banner.jpg"):
+        photo = FSInputFile("banner.jpg")
+        new_msg = await message.answer_photo(
+            photo=photo,
+            caption=caption_text,
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+    else:
+        new_msg = await message.answer(
+            text=caption_text,
+            reply_markup=markup,
+            parse_mode="Markdown"
+        )
+    
+    # Запоминаем ID, чтобы удалить его при следующем /start
+    last_main_message[user_id] = new_msg.message_id
 
 @dp.message(F.web_app_data)
 async def handle_data(message: types.Message):
-    """Сохраняем данные анкеты в БД"""
     try:
         data = json.loads(message.web_app_data.data)
-        
         async with engine.begin() as conn:
             await conn.run_sync(metadata.create_all)
             stmt = insert(users_table).values(
@@ -83,18 +111,15 @@ async def handle_data(message: types.Message):
             )
             await conn.execute(stmt)
         
-        # Это сообщение само удалится через 5 минут
-        success_msg = await message.answer("✅ Профиль настроен!")
-        asyncio.create_task(delete_message_after(message.chat.id, success_msg.message_id, 300))
+        res = await message.answer("✅ Данные синхронизированы!")
+        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 30))
         
-    except Exception as e:
-        print(f"DB Log: {e}")
-        # Если юзер просто перезашел
-        welcome_back = await message.answer("С возвращением! Все данные сохранены.")
-        asyncio.create_task(delete_message_after(message.chat.id, welcome_back.message_id, 300))
+    except Exception:
+        res = await message.answer("💪 Рады видеть тебя снова!")
+        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 30))
 
 async def main():
-    print("Бот запущен...")
+    print("Бот запущен. Режим 'Чистый чат' активен.")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
