@@ -18,8 +18,10 @@
 
         * {
             font-family: 'Comfortaa', sans-serif;
-            font-weight: 700; /* Везде жирный шрифт */
+            font-weight: 700;
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            outline: none !important; /* Убираем системные обводки */
         }
 
         body {
@@ -31,65 +33,89 @@
 
         .container { padding: 25px; padding-bottom: 100px; }
 
-        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page { display: none; }
         .page.active { display: block; }
 
         .step { display: none; flex-direction: column; gap: 20px; }
-        .step.active { display: flex; animation: fadeIn 0.4s ease; }
+        .step.active { display: flex; animation: stepFade 0.4s ease forwards; }
 
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes stepFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h1 { font-size: 20px; text-align: center; margin-bottom: 5px; color: var(--text-main); }
-        .slogan { text-align: center; color: var(--text-desc); font-size: 12px; margin-bottom: 30px; font-weight: 400; }
+        /* ОДНОРАЗОВАЯ ВОЛНА */
+        .title-wrapper { 
+            display: flex; justify-content: center; 
+            margin-bottom: 5px; min-height: 30px; 
+        }
+        .letter {
+            display: inline-block; font-size: 16px; text-transform: uppercase;
+            white-space: pre; opacity: 1;
+        }
+        .letter.animate { animation: jumpOnce 0.8s ease-out forwards; }
 
-        /* Поля ввода без ползунков */
+        @keyframes jumpOnce {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-8px); color: var(--accent-color); }
+            100% { transform: translateY(0); }
+        }
+
+        .main-slogan { text-align: center; color: var(--text-desc); font-size: 10px; font-weight: 400; opacity: 0.5; margin-bottom: 20px; letter-spacing: 1px; }
+
+        /* ЛАКОНИЧНЫЙ ТЕКСТ ШАГА */
+        .step-pure-text {
+            text-align: center; font-size: 13px; color: var(--text-desc);
+            font-weight: 400; line-height: 1.5; margin-bottom: 25px;
+            padding: 0 10px; min-height: 40px;
+        }
+
+        /* ИНПУТЫ БЕЗ МУСОРА */
         input {
             width: 100%; padding: 18px; background: var(--input-bg);
-            border: 2px solid rgba(255,255,255,0.05); border-radius: 18px;
-            color: white; font-size: 16px; box-sizing: border-box; outline: none; text-align: center;
+            border: 1px solid rgba(255,255,255,0.08); border-radius: 18px;
+            color: white; font-size: 16px; text-align: center;
+            transition: border-color 0.3s;
         }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
-            -webkit-appearance: none; margin: 0;
-        }
+        input:focus { border-color: var(--accent-color); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        /* Фигуры вместо полов */
-        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .gender-card {
             background: var(--card-bg); border-radius: 22px; padding: 30px 10px;
-            text-align: center; border: 2px solid transparent; cursor: pointer; transition: 0.3s;
+            text-align: center; border: 1px solid transparent; cursor: pointer;
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center;
         }
-        .gender-card svg { width: 50px; height: 50px; fill: white; margin-bottom: 10px; }
         .gender-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.1); }
+        .shape-svg { width: 60px; height: 80px; transition: 0.3s; }
+        .gender-label { margin-top: 12px; font-size: 10px; letter-spacing: 1px; color: var(--text-desc); }
 
         .option-card {
-            background: var(--card-bg); padding: 20px; border-radius: 20px;
-            border: 2px solid rgba(255,255,255,0.05); text-align: center; cursor: pointer;
+            background: var(--card-bg); padding: 18px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05); text-align: center; cursor: pointer; transition: 0.2s;
         }
-        .option-card.selected { background: var(--accent-color); border-color: white; }
+        .option-card.selected { border-color: var(--accent-color); background: rgba(59, 130, 246, 0.2); }
 
+        .btn-group { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-top: 5px; }
         .main-btn {
             background: var(--accent-color); color: white; border: none;
-            padding: 20px; border-radius: 22px; width: 100%; font-size: 16px;
-            cursor: pointer; margin-top: 10px;
+            padding: 18px; border-radius: 20px; font-size: 14px;
+            cursor: pointer; text-transform: uppercase;
         }
-        .main-btn:disabled { opacity: 0.3; }
+        .back-btn {
+            background: rgba(255,255,255,0.03); color: var(--text-desc); border: 1px solid rgba(255,255,255,0.08);
+            padding: 18px; border-radius: 20px; font-size: 13px; cursor: pointer;
+        }
+        .main-btn:disabled { opacity: 0.2; }
+
+        /* ПОЯСНЕНИЕ ИМТ */
+        .bmi-container { margin-top: 10px; text-align: center; animation: fadeIn 0.3s; }
+        .bmi-value { font-size: 14px; color: var(--accent-color); margin-bottom: 4px; }
+        .bmi-text { font-size: 11px; color: var(--text-desc); font-weight: 400; }
 
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0;
-            height: 80px; background: rgba(15, 23, 42, 0.98);
+            height: 70px; background: rgba(15, 23, 42, 0.98);
             display: none; grid-template-columns: repeat(3, 1fr);
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .nav-item {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; font-size: 11px; color: var(--text-desc); opacity: 0.5;
-        }
-        .nav-item.active { color: var(--accent-color); opacity: 1; }
-
-        .menu-item {
-            background: var(--card-bg); border-radius: 24px; padding: 22px;
-            margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255,255,255,0.05);
         }
     </style>
 </head>
@@ -97,64 +123,93 @@
 
 <div class="container">
     <div id="survey-page" class="page active">
-        <h1>Завтра будет все намного проще</h1>
-        <div class="slogan">Твой путь начинается здесь</div>
+        <div class="title-wrapper" id="wave-title"></div>
+        <div class="main-slogan">My Way — Твой путь</div>
         
+        <div class="step-pure-text" id="step-description"></div>
+
         <div class="step active" id="s1">
-            <input type="text" id="u_name" placeholder="Имя (необязательно)">
-            <div style="font-size: 11px; text-align: center; color: var(--text-desc); margin-bottom: 10px;">
-                Если оставить пустым, используем имя из профиля
-            </div>
+            <input type="text" id="u_name" placeholder="ИМЯ (НЕОБЯЗАТЕЛЬНО)">
             <div class="gender-grid">
                 <div class="gender-card" id="g_male" onclick="setG('male')">
-                    <svg viewBox="0 0 24 24"><path d="M12 2L4.5 20.29L5.21 21L12 18L18.79 21L19.5 20.29L12 2Z"/></svg>
-                    <div>ТРЕУГОЛЬНИК</div>
+                    <svg class="shape-svg" viewBox="0 0 100 120">
+                        <circle cx="50" cy="25" r="20" fill="#00bfff"/>
+                        <path d="M15 55 L85 55 L50 115 Z" fill="#00bfff"/>
+                    </svg>
+                    <div class="gender-label">МУЖСКОЙ</div>
                 </div>
                 <div class="gender-card" id="g_female" onclick="setG('female')">
-                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/></svg>
-                    <div>КРУГ</div>
+                    <svg class="shape-svg" viewBox="0 0 100 120">
+                        <circle cx="50" cy="25" r="20" fill="#ff00ff"/>
+                        <path d="M50 55 L90 115 L10 115 Z" fill="#ff00ff"/>
+                    </svg>
+                    <div class="gender-label">ЖЕНСКИЙ</div>
                 </div>
             </div>
-            <button class="main-btn" id="b1" disabled onclick="nextS(2)">Далее</button>
+            <button class="main-btn" id="b1" disabled onclick="nextS(2)">ДАЛЕЕ</button>
         </div>
 
         <div class="step" id="s2">
-            <input type="number" id="u_age" placeholder="Возраст" step="1" oninput="checkS2()">
-            <input type="number" id="u_height" placeholder="Рост (см)" step="0.1" oninput="checkS2()">
-            <input type="number" id="u_weight" placeholder="Вес (кг)" step="0.1" oninput="checkS2()">
-            <div style="text-align: center; font-size: 12px; color: var(--accent-color);" id="bmi_res"></div>
-            <button class="main-btn" id="b2" disabled onclick="nextS(3)">Далее</button>
+            <input type="number" id="u_age" placeholder="ВОЗРАСТ" oninput="checkS2()">
+            <input type="number" id="u_height" placeholder="РОСТ (СМ)" oninput="checkS2()">
+            <input type="number" id="u_weight" placeholder="ВЕС (КГ)" oninput="checkS2()">
+            
+            <div id="bmi_res" class="bmi-container" style="display:none;">
+                <div class="bmi-value" id="bmi_val"></div>
+                <div class="bmi-text" id="bmi_txt"></div>
+            </div>
+
+            <div class="btn-group">
+                <button class="back-btn" onclick="nextS(1)">НАЗАД</button>
+                <button class="main-btn" id="b2" disabled onclick="nextS(3)">ДАЛЕЕ</button>
+            </div>
         </div>
 
         <div id="s3" class="step">
             <div class="option-card" onclick="setGoal(this, 'weight_loss')">ПОХУДЕНИЕ</div>
             <div class="option-card" onclick="setGoal(this, 'muscle_gain')">НАБОР МАССЫ</div>
             <div class="option-card" onclick="setGoal(this, 'keep_fit')">ПОДДЕРЖАНИЕ ФОРМЫ</div>
-            <button class="main-btn" id="b3" disabled onclick="finishSurvey()">ЗАВЕРШИТЬ</button>
+            <div class="btn-group">
+                <button class="back-btn" onclick="nextS(2)">НАЗАД</button>
+                <button class="main-btn" id="b3" disabled onclick="finishSurvey()">ГОТОВО</button>
+            </div>
         </div>
     </div>
 
     <div id="main-page" class="page">
-        <h1 id="hi_user">ПРИВЕТ</h1>
-        <div class="menu-item"><h3>ТРЕНИРОВКА ДНЯ</h3><p>ПРОГРАММА СОСТАВЛЕНА</p></div>
-        <div class="menu-item"><h3>ПИТАНИЕ</h3><p>ПЛАН НА СЕГОДНЯ</p></div>
+        <h1 id="hi_user" style="text-align:center; margin-top:50px;">ПРИВЕТ</h1>
     </div>
 </div>
 
 <nav class="bottom-nav" id="bottom-nav">
-    <div class="nav-item active" onclick="tab('main')">ГЛАВНАЯ</div>
-    <div class="nav-item" onclick="tab('profile')">ПРОФИЛЬ</div>
-    <div class="nav-item" onclick="tab('settings')">НАСТРОЙКИ</div>
+    <div style="display:flex; align-items:center; justify-content:center; font-size:10px; opacity:0.5;">ГЛАВНАЯ</div>
+    <div style="display:flex; align-items:center; justify-content:center; font-size:10px; opacity:0.5;">ПРОФИЛЬ</div>
+    <div style="display:flex; align-items:center; justify-content:center; font-size:10px; opacity:0.5;">НАСТРОЙКИ</div>
 </nav>
 
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
 
-    let data = { 
-        name: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : 'Атлет', 
-        gender: '', age: '', height: '', weight: '', goal: '' 
+    let data = { name: 'АТЛЕТ', gender: '', age: '', height: '', weight: '', goal: '' };
+
+    const stepsText = {
+        1: "Выбери пол и введи имя, чтобы начать путь.",
+        2: "Укажи актуальные параметры тела для точного расчета программы.",
+        3: "Выбери цель, которой хочешь достичь в ближайшее время."
     };
+
+    function runWaveEffect(text) {
+        const wrapper = document.getElementById('wave-title');
+        wrapper.innerHTML = '';
+        text.split('').forEach((char, i) => {
+            const span = document.createElement('span');
+            span.innerText = char;
+            span.className = 'letter animate';
+            span.style.animationDelay = `${i * 0.05}s`;
+            wrapper.appendChild(span);
+        });
+    }
 
     function setG(g) {
         data.gender = g;
@@ -168,16 +223,20 @@
         data.height = document.getElementById('u_height').value;
         data.weight = document.getElementById('u_weight').value;
         
-        if(data.height && data.weight) {
-            let hm = data.height / 100;
-            let bmi = (data.weight / (hm * hm)).toFixed(1);
-            let desc = "";
-            if(bmi < 18.5) desc = "Дефицит веса";
-            else if(bmi < 25) desc = "Норма";
-            else if(bmi < 30) desc = "Лишний вес";
-            else desc = "Ожирение";
-            document.getElementById('bmi_res').innerText = `ИМТ: ${bmi} (${desc})`;
-        }
+        let resBox = document.getElementById('bmi_res');
+        if(data.height > 100 && data.weight > 30) {
+            let bmi = (data.weight / ((data.height/100)**2)).toFixed(1);
+            let txt = "";
+            if(bmi < 18.5) txt = "Дефицит массы тела. Нужно больше калорий.";
+            else if(bmi < 25) txt = "Нормальный вес. Отличный старт!";
+            else if(bmi < 30) txt = "Избыточный вес. Рекомендуем дефицит калорий.";
+            else txt = "Ожирение. Требуется строгий контроль рациона.";
+            
+            document.getElementById('bmi_val').innerText = `Твой ИМТ: ${bmi}`;
+            document.getElementById('bmi_txt').innerText = txt;
+            resBox.style.display = 'block';
+        } else resBox.style.display = 'none';
+        
         document.getElementById('b2').disabled = !(data.age && data.height && data.weight);
     }
 
@@ -191,25 +250,23 @@
     function nextS(n) {
         document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
         document.getElementById('s'+n).classList.add('active');
+        document.getElementById('step-description').innerText = stepsText[n];
+        runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ"); // Перезапуск волны при смене шага
     }
 
     function finishSurvey() {
-        let inputName = document.getElementById('u_name').value.trim();
-        if(inputName) data.name = inputName;
-        
-        data.action = 'survey_done';
+        let name = document.getElementById('u_name').value.trim();
+        if(name) data.name = name;
         tg.sendData(JSON.stringify(data));
-
         document.getElementById('survey-page').classList.remove('active');
         document.getElementById('main-page').classList.add('active');
         document.getElementById('bottom-nav').style.display = 'grid';
         document.getElementById('hi_user').innerText = `ПРИВЕТ, ${data.name.toUpperCase()}`;
     }
 
-    function tab(name) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById(name + '-page').classList.add('active');
-    }
+    // Первый запуск
+    runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
+    document.getElementById('step-description').innerText = stepsText[1];
 </script>
 </body>
 </html>
