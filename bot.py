@@ -4,7 +4,7 @@ import os
 import time
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, ReplyKeyboardRemove
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import insert, MetaData, Table, Column, Integer, String, BigInteger, Float
 from dotenv import load_dotenv
@@ -35,22 +35,27 @@ async def cmd_start(message: types.Message):
     timestamp = int(time.time())
     web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={timestamp}"
     
-    # В чате ТОЛЬКО одна кнопка для запуска всего приложения
-    markup = ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="🚀 Открыть My Way", web_app=WebAppInfo(url=web_app_url))]
-    ], resize_keyboard=True)
+    # СОЗДАЕМ ИНЛАЙН (СИНЮЮ) КНОПКУ
+    markup = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="🚀 ОТКРЫТЬ MY WAY", web_app=WebAppInfo(url=web_app_url))]
+    ])
     
+    # Удаляем обычные кнопки, если они остались у юзера
     await message.answer(
         "Добро пожаловать в **My Way**! 💪\n\n"
         "Твой план тренировок, питание и прогресс теперь в одном месте.\n"
-        "Нажми на кнопку ниже, чтобы зайти в приложение:",
+        "Нажми на кнопку ниже, чтобы войти в приложение:",
         reply_markup=markup,
         parse_mode="Markdown"
     )
 
+    # Дополнительно отправляем пустой ReplyKeyboardRemove, чтобы снести старую большую кнопку
+    # Это сработает один раз при старте
+    await message.answer("Интерфейс обновлен ✅", reply_markup=ReplyKeyboardRemove())
+
 @dp.message(F.web_app_data)
 async def handle_data(message: types.Message):
-    """Обработка данных, когда юзер нажимает 'Завершить' в приложении"""
+    """Обработка данных (если вдруг решишь оставить отправку данных из WebApp)"""
     try:
         data = json.loads(message.web_app_data.data)
         
@@ -71,11 +76,10 @@ async def handle_data(message: types.Message):
         
     except Exception as e:
         print(f"DB Log: {e}")
-        # Если юзер уже есть, просто подтверждаем вход
         await message.answer("Рады видеть тебя снова! Все обновления сохранены в приложении.")
 
 async def main():
-    print("Бот запущен...")
+    print("Бот запущен на твоем железе...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
