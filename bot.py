@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Настройка БД
 engine = create_async_engine(os.getenv("DATABASE_URL"))
 metadata = MetaData()
 
@@ -29,7 +28,7 @@ users_table = Table('users', metadata,
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
-# Словарь для хранения ID последнего "вечного" сообщения для каждого юзера
+# Храним ID последнего баннера
 last_main_message = {}
 
 async def delete_message_after(chat_id: int, message_id: int, delay: int):
@@ -45,37 +44,37 @@ async def cmd_start(message: types.Message):
     timestamp = int(time.time())
     web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={timestamp}"
     
-    # 1. Удаляем ПРЕДЫДУЩЕЕ главное сообщение, если оно было
+    # 1. УДАЛЯЕМ СТАРЫЙ БАННЕР
     if user_id in last_main_message:
         try:
             await bot.delete_message(message.chat.id, last_main_message[user_id])
         except Exception:
             pass
 
-    # 2. Убираем старую серую кнопку внизу (ReplyKeyboardRemove)
-    temp_msg = await message.answer("Обновление интерфейса...", reply_markup=ReplyKeyboardRemove())
-    asyncio.create_task(delete_message_after(message.chat.id, temp_msg.message_id, 3))
+    # 2. АГРЕССИВНО УДАЛЯЕМ КНОПКУ (ReplyKeyboardRemove)
+    # Отправляем невидимый символ, чтобы просто снести клавиатуру
+    cleanup = await message.answer("ㅤ", reply_markup=ReplyKeyboardRemove())
+    asyncio.create_task(delete_message_after(message.chat.id, cleanup.message_id, 0)) # Удаляем мгновенно
     
-    # 3. Удаляем саму команду /start от юзера
-    asyncio.create_task(delete_message_after(message.chat.id, message.message_id, 3))
+    # Удаляем /start юзера
+    asyncio.create_task(delete_message_after(message.chat.id, message.message_id, 1))
 
-    # Настройка кнопки
     markup = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💎 ОТКРЫТЬ MY WAY", web_app=WebAppInfo(url=web_app_url))]
+        [InlineKeyboardButton(text="⚡️ ЗАПУСТИТЬ MY WAY", web_app=WebAppInfo(url=web_app_url))]
     ])
 
+    # Текст с использованием качественных символов
     caption_text = (
-        "✨ **MY WAY — ТВОЙ ЛИЧНЫЙ ПУТЬ**\n\n"
-        "Твой прогресс не терпит суеты. Мы подготовили всё для твоей трансформации в одном приложении.\n\n"
-        "📊 **Доступные модули:**\n"
-        "├ Контроль КБЖУ и веса\n"
-        "├ Тренировочные сплиты\n"
-        "└ Аналитика активности\n\n"
-        "🚀 *Нажми кнопку ниже, чтобы войти:*"
+        "🏆 **MY WAY — ПЕРСОНАЛЬНЫЙ ТРЕНЕР**\n\n"
+        "Добро пожаловать в экосистему твоего прогресса. "
+        "Мы убрали всё лишнее, чтобы ты мог сосредоточиться на результате.\n\n"
+        "🧬 **ИНТЕЛЛЕКТУАЛЬНЫЕ МОДУЛИ:**\n"
+        "💠 `TRACKER` — Умный расчет КБЖУ\n"
+        "💠 `EVO` — Динамика твоих показателей\n"
+        "💠 `FLOW` — Твой план на сегодня\n\n"
+        "🔥 *Готов стать лучшей версией себя?*"
     )
 
-    # 4. Отправляем новое "вечное" сообщение (с фото или без)
-    new_msg = None
     if os.path.exists("banner.jpg"):
         photo = FSInputFile("banner.jpg")
         new_msg = await message.answer_photo(
@@ -91,7 +90,6 @@ async def cmd_start(message: types.Message):
             parse_mode="Markdown"
         )
     
-    # Запоминаем ID, чтобы удалить его при следующем /start
     last_main_message[user_id] = new_msg.message_id
 
 @dp.message(F.web_app_data)
@@ -111,15 +109,15 @@ async def handle_data(message: types.Message):
             )
             await conn.execute(stmt)
         
-        res = await message.answer("✅ Данные синхронизированы!")
-        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 30))
+        res = await message.answer("🌟 Профиль успешно синхронизирован!")
+        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 10))
         
     except Exception:
-        res = await message.answer("💪 Рады видеть тебя снова!")
-        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 30))
+        res = await message.answer("🦾 Рады видеть тебя в строю!")
+        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 10))
 
 async def main():
-    print("Бот запущен. Режим 'Чистый чат' активен.")
+    print("Бот запущен. Кнопки будут уничтожены.")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
