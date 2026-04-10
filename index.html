@@ -53,7 +53,6 @@
         .main-slogan { text-align: center; color: var(--text-desc); font-size: 10px; font-weight: 400; opacity: 0.5; margin-bottom: 20px; letter-spacing: 1px; }
         .step-pure-text { text-align: center; font-size: 13px; color: var(--text-desc); font-weight: 400; line-height: 1.5; margin-bottom: 25px; min-height: 40px; }
 
-        /* ИНПУТЫ И АНКЕТА */
         input { width: 100%; padding: 18px; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: white; font-size: 16px; text-align: center; transition: 0.3s; }
         input:focus { border-color: var(--accent-color); }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -87,7 +86,10 @@
         .bmi-text { font-size: 11px; color: var(--text-desc); font-weight: 400; margin-top: 10px; line-height: 1.4; }
 
         /* DASHBOARD */
-        .dashboard { display: flex; flex-direction: column; gap: 20px; }
+        .tab-content { display: none; animation: fadeIn 0.4s ease forwards; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .status-card {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%);
             border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 28px; padding: 30px 20px; text-align: center;
@@ -118,7 +120,7 @@
             display: none; grid-template-columns: repeat(3, 1fr);
             border-top: 1px solid rgba(255,255,255,0.05); padding-bottom: 15px;
         }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text-desc); opacity: 0.5; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; color: var(--text-desc); opacity: 0.5; cursor: pointer; }
         .nav-item.active { opacity: 1; color: var(--accent-color); }
         .nav-dot { width: 4px; height: 4px; background: var(--accent-color); border-radius: 50%; margin-top: 5px; display: none; }
         .nav-item.active .nav-dot { display: block; }
@@ -170,30 +172,38 @@
     </div>
 
     <div id="main-page" class="page">
-        <div class="dashboard">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h2 id="hi_user" style="font-size:18px; margin:0;">ПРИВЕТ, АТЛЕТ</h2>
-                <div id="curr_date" style="font-size:11px; opacity:0.5; text-transform:uppercase;">СЕГОДНЯ</div>
-            </div>
-            <div class="status-card">
-                <div class="cal-ring"><span id="cal_left">0</span><small>ккал осталось</small></div>
-                <div class="pfc-row">
-                    <div class="pfc-box"><div class="pfc-l">БЕЛКИ</div><div class="pfc-v" id="p_v">0г</div></div>
-                    <div class="pfc-box"><div class="pfc-l">ЖИРЫ</div><div class="pfc-v" id="f_v">0г</div></div>
-                    <div class="pfc-box"><div class="pfc-l">УГЛЕВ</div><div class="pfc-v" id="c_v">0г</div></div>
+        <div id="tab-home" class="tab-content active">
+            <div class="dashboard">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 id="hi_user" style="font-size:18px; margin:0;">ПРИВЕТ, АТЛЕТ</h2>
+                    <div id="curr_date" style="font-size:11px; opacity:0.5; text-transform:uppercase;">СЕГОДНЯ</div>
                 </div>
+                <div class="status-card">
+                    <div class="cal-ring"><span id="cal_left">0</span><small>ккал осталось</small></div>
+                    <div class="pfc-row">
+                        <div class="pfc-box"><div class="pfc-l">БЕЛКИ</div><div class="pfc-v" id="p_v">0г</div></div>
+                        <div class="pfc-box"><div class="pfc-l">ЖИРЫ</div><div class="pfc-v" id="f_v">0г</div></div>
+                        <div class="pfc-box"><div class="pfc-l">УГЛЕВ</div><div class="pfc-v" id="c_v">0г</div></div>
+                    </div>
+                </div>
+                <div class="section-title">План на день</div>
+                <div class="daily-task"><div class="task-icon">🔥</div><div><div style="font-size:14px;">Основная тренировка</div><div style="font-size:11px; color:var(--text-desc); font-weight:400;">Нажми, чтобы открыть</div></div></div>
             </div>
-            <div class="section-title">План на день</div>
-            <div class="daily-task"><div class="task-icon">🔥</div><div><div style="font-size:14px;">Жиросжигающая</div><div style="font-size:11px; color:var(--text-desc); font-weight:400;">35 мин • 320 ккал</div></div></div>
-            <div class="daily-task"><div class="task-icon">🥗</div><div><div style="font-size:14px;">Завтрак</div><div style="font-size:11px; color:var(--text-desc); font-weight:400;">Овсянка с ягодами</div></div></div>
+        </div>
+
+        <div id="tab-profile" class="tab-content">
+            <h2 style="font-size:18px; margin-bottom:20px;">ПРОФИЛЬ</h2>
+            <div class="status-card" style="text-align:left; font-size:14px; line-height:2;" id="prof_data">
+                </div>
+            <button class="back-btn" style="width:100%; margin-top:20px; color:#f87171; border-color:rgba(239,68,68,0.2);" onclick="hardReset()">СБРОСИТЬ ДАННЫЕ</button>
         </div>
     </div>
 </div>
 
 <nav class="bottom-nav" id="bottom-nav">
-    <div class="nav-item active"><span>ГЛАВНАЯ</span><div class="nav-dot"></div></div>
+    <div class="nav-item active" onclick="switchTab('home', this)"><span>ГЛАВНАЯ</span><div class="nav-dot"></div></div>
     <div class="nav-item"><span>ПЛАН</span><div class="nav-dot"></div></div>
-    <div class="nav-item"><span>ПРОФИЛЬ</span><div class="nav-dot"></div></div>
+    <div class="nav-item" onclick="switchTab('profile', this)"><span>ПРОФИЛЬ</span><div class="nav-dot"></div></div>
 </nav>
 
 <script>
@@ -234,10 +244,10 @@
         if(data.height > 100 && data.weight > 30) {
             let bmi = (data.weight / ((data.height/100)**2)).toFixed(1);
             let st = "", d = "", cl = "";
-            if(bmi < 18.5) { st = "Дефицит"; d = "Нужно усиленное питание."; cl = "status-low"; }
-            else if(bmi < 25) { st = "Норма"; d = "Идеальный баланс для старта."; cl = "status-good"; }
-            else if(bmi < 30) { st = "Избыток"; d = "Подберем режим для коррекции."; cl = "status-warn"; }
-            else { st = "Ожирение"; d = "Сосредоточимся на дефиците."; cl = "status-danger"; }
+            if(bmi < 18.5) { st = "Дефицит"; d = "Твой вес ниже нормы. Нужно больше калорий."; cl = "status-low"; }
+            else if(bmi < 25) { st = "Норма"; d = "Идеальный баланс. Отличный старт!"; cl = "status-good"; }
+            else if(bmi < 30) { st = "Избыток"; d = "Есть лишний вес. Скорректируем рацион."; cl = "status-warn"; }
+            else { st = "Ожирение"; d = "Требуется строгий контроль питания."; cl = "status-danger"; }
             resBox.innerHTML = `<div class="bmi-value">ИМТ: ${bmi}</div><span class="bmi-status ${cl}">${st}</span><div class="bmi-text">${d}</div>`;
             resBox.style.display = 'block';
         } else resBox.style.display = 'none';
@@ -258,6 +268,17 @@
         runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
     }
 
+    function switchTab(tab, el) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        document.getElementById('tab-'+tab).classList.add('active');
+        el.classList.add('active');
+    }
+
+    function hardReset() {
+        if(confirm("Сбросить все данные и начать заново?")) location.reload();
+    }
+
     function finishSurvey() {
         let name = document.getElementById('u_name').value.trim();
         if(name) data.name = name;
@@ -265,11 +286,19 @@
         let tdee = Math.round(bmr * 1.375);
         if(data.goal === 'weight_loss') tdee -= 400;
         if(data.goal === 'muscle_gain') tdee += 400;
+
         document.getElementById('cal_left').innerText = tdee;
         document.getElementById('p_v').innerText = Math.round(data.weight * 2) + 'г';
         document.getElementById('f_v').innerText = Math.round(data.weight * 0.9) + 'г';
         document.getElementById('c_v').innerText = Math.round((tdee - (data.weight*2*4 + data.weight*0.9*9)) / 4) + 'г';
         document.getElementById('curr_date').innerText = new Date().toLocaleDateString('ru-RU', {day:'numeric', month:'long'});
+        
+        document.getElementById('prof_data').innerHTML = `
+            ИМЯ: ${data.name.toUpperCase()}<br>
+            РОСТ: ${data.height} СМ<br>
+            ВЕС: ${data.weight} КГ<br>
+            ЦЕЛЬ: ${data.goal === 'muscle_gain' ? 'НАБОР МАССЫ' : data.goal === 'weight_loss' ? 'ПОХУДЕНИЕ' : 'ПОДДЕРЖАНИЕ'}`;
+
         tg.sendData(JSON.stringify(data));
         document.getElementById('survey-page').classList.remove('active');
         document.getElementById('main-page').classList.add('active');
