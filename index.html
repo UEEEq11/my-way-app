@@ -199,7 +199,7 @@
     let tg = window.Telegram.WebApp;
     tg.expand();
     
-    // Проверка сохраненных данных
+    // ПРОВЕРКА СОХРАНЕНИЯ
     let saved = localStorage.getItem('user_data');
     let data = saved ? JSON.parse(saved) : { name: 'АТЛЕТ', gender: '', age: '', height: '', weight: '', goal: '' };
 
@@ -270,7 +270,7 @@
 
     function hardReset() {
         if(confirm("Сбросить все данные?")) {
-            localStorage.removeItem('user_data');
+            localStorage.clear();
             location.reload();
         }
     }
@@ -281,7 +281,6 @@
         
         localStorage.setItem('user_data', JSON.stringify(data));
 
-        // Расчет калорий (Миффлин-Сан Жеор)
         let bmr = (10 * data.weight) + (6.25 * data.height) - (5 * data.age) + (data.gender === 'male' ? 5 : -161);
         let tdee = Math.round(bmr * 1.375);
         if(data.goal === 'weight_loss') tdee -= 400;
@@ -303,11 +302,9 @@
         document.getElementById('main-page').classList.add('active');
         document.getElementById('bottom-nav').style.display = 'grid';
         document.getElementById('hi_user').innerText = `ПРИВЕТ, ${data.name.toUpperCase()}`;
-
-        // Мы не вызываем tg.sendData, чтобы приложение не закрывалось
     }
 
-    // Если данные уже есть, запускаем Dashboard сразу
+    // ЛОГИКА АВТОВХОДА
     if(saved) {
         finishSurvey();
     } else {
