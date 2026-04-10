@@ -30,7 +30,7 @@ dp = Dispatcher()
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
     # Ссылка на твой обновленный GitHub Pages
-    web_app_url = "https://ueeeq11.github.io/my-way-app/"
+    web_app_url = "https://ueeeq11.github.io/my-way-app/?v=2"
     
     markup = ReplyKeyboardMarkup(keyboard=[
         [KeyboardButton(text="📝 Заполнить новую анкету", web_app=WebAppInfo(url=web_app_url))]
