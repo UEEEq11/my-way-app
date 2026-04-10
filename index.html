@@ -41,7 +41,6 @@
         .step.active { display: flex; animation: stepFade 0.4s ease forwards; }
         @keyframes stepFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ОДНОРАЗОВАЯ ВОЛНА ЗАГОЛОВКА */
         .title-wrapper { display: flex; justify-content: center; margin-bottom: 5px; min-height: 30px; }
         .letter { display: inline-block; font-size: 16px; text-transform: uppercase; white-space: pre; }
         .letter.animate { animation: jumpOnce 0.8s ease-out forwards; }
@@ -55,8 +54,6 @@
 
         input { width: 100%; padding: 18px; background: var(--input-bg); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; color: white; font-size: 16px; text-align: center; transition: 0.3s; }
         input:focus { border-color: var(--accent-color); }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
 
         .gender-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .gender-card { background: var(--card-bg); border-radius: 22px; padding: 30px 10px; text-align: center; border: 1px solid transparent; cursor: pointer; transition: 0.3s; display: flex; flex-direction: column; align-items: center; }
@@ -72,23 +69,16 @@
         .back-btn { background: rgba(255,255,255,0.03); color: var(--text-desc); border: 1px solid rgba(255,255,255,0.08); padding: 18px; border-radius: 20px; font-size: 13px; cursor: pointer; }
         .main-btn:disabled { opacity: 0.2; }
 
-        /* ИМТ БЛОК */
         .bmi-container { 
             margin-top: 15px; text-align: center; background: rgba(255, 255, 255, 0.03); 
             padding: 15px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.05); animation: fadeIn 0.4s ease;
         }
         .bmi-value { font-size: 16px; color: var(--accent-color); margin-bottom: 8px; }
-        .bmi-status { font-size: 11px; padding: 4px 12px; border-radius: 10px; display: inline-block; text-transform: uppercase; letter-spacing: 0.5px; }
+        .bmi-status { font-size: 11px; padding: 4px 12px; border-radius: 10px; display: inline-block; text-transform: uppercase; }
         .status-low { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
         .status-good { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
         .status-warn { background: rgba(234, 179, 8, 0.2); color: #facc15; }
         .status-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-        .bmi-text { font-size: 11px; color: var(--text-desc); font-weight: 400; margin-top: 10px; line-height: 1.4; }
-
-        /* DASHBOARD */
-        .tab-content { display: none; animation: fadeIn 0.4s ease forwards; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         .status-card {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0.6) 100%);
@@ -100,20 +90,15 @@
             background: radial-gradient(closest-side, #020617 85%, transparent 85% 100%),
                         conic-gradient(var(--accent-color) 75%, rgba(59, 130, 246, 0.1) 0);
         }
-        .cal-ring span { font-size: 24px; font-weight: 700; color: var(--text-main); }
-        .cal-ring small { font-size: 9px; color: var(--text-desc); text-transform: uppercase; margin-top: 4px; }
+        .cal-ring span { font-size: 24px; color: var(--text-main); }
         .pfc-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
         .pfc-box { background: rgba(255,255,255,0.03); border-radius: 18px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); }
         .pfc-l { font-size: 9px; color: var(--text-desc); margin-bottom: 5px; }
         .pfc-v { font-size: 13px; color: var(--accent-color); }
-        .section-title { font-size: 14px; margin: 10px 0 5px 5px; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px; }
-        .daily-task {
-            background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid rgba(255,255,255,0.05);
-            display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
-        }
-        .task-icon { width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
 
-        /* ТАБ-БАР */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; right: 0; height: 80px;
             background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px);
@@ -124,6 +109,13 @@
         .nav-item.active { opacity: 1; color: var(--accent-color); }
         .nav-dot { width: 4px; height: 4px; background: var(--accent-color); border-radius: 50%; margin-top: 5px; display: none; }
         .nav-item.active .nav-dot { display: block; }
+
+        .section-title { font-size: 14px; margin: 20px 0 10px 5px; text-transform: uppercase; letter-spacing: 1px; }
+        .daily-task {
+            background: var(--card-bg); border-radius: 24px; padding: 18px; border: 1px solid rgba(255,255,255,0.05);
+            display: flex; align-items: center; gap: 15px; margin-bottom: 10px;
+        }
+        .task-icon { width: 48px; height: 48px; background: rgba(59, 130, 246, 0.1); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
     </style>
 </head>
 <body>
@@ -173,28 +165,25 @@
 
     <div id="main-page" class="page">
         <div id="tab-home" class="tab-content active">
-            <div class="dashboard">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <h2 id="hi_user" style="font-size:18px; margin:0;">ПРИВЕТ, АТЛЕТ</h2>
-                    <div id="curr_date" style="font-size:11px; opacity:0.5; text-transform:uppercase;">СЕГОДНЯ</div>
-                </div>
-                <div class="status-card">
-                    <div class="cal-ring"><span id="cal_left">0</span><small>ккал осталось</small></div>
-                    <div class="pfc-row">
-                        <div class="pfc-box"><div class="pfc-l">БЕЛКИ</div><div class="pfc-v" id="p_v">0г</div></div>
-                        <div class="pfc-box"><div class="pfc-l">ЖИРЫ</div><div class="pfc-v" id="f_v">0г</div></div>
-                        <div class="pfc-box"><div class="pfc-l">УГЛЕВ</div><div class="pfc-v" id="c_v">0г</div></div>
-                    </div>
-                </div>
-                <div class="section-title">План на день</div>
-                <div class="daily-task"><div class="task-icon">🔥</div><div><div style="font-size:14px;">Основная тренировка</div><div style="font-size:11px; color:var(--text-desc); font-weight:400;">Нажми, чтобы открыть</div></div></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 id="hi_user" style="font-size:18px; margin:0;">ПРИВЕТ, АТЛЕТ</h2>
+                <div id="curr_date" style="font-size:11px; opacity:0.5; text-transform:uppercase;"></div>
             </div>
+            <div class="status-card">
+                <div class="cal-ring"><span id="cal_left">0</span><small style="font-size:9px; opacity:0.6;">ккал</small></div>
+                <div class="pfc-row">
+                    <div class="pfc-box"><div class="pfc-l">БЕЛКИ</div><div class="pfc-v" id="p_v">0г</div></div>
+                    <div class="pfc-box"><div class="pfc-l">ЖИРЫ</div><div class="pfc-v" id="f_v">0г</div></div>
+                    <div class="pfc-box"><div class="pfc-l">УГЛЕВ</div><div class="pfc-v" id="c_v">0г</div></div>
+                </div>
+            </div>
+            <div class="section-title">План на день</div>
+            <div class="daily-task"><div class="task-icon">🔥</div><div><div style="font-size:14px;">Основная тренировка</div><div style="font-size:11px; color:var(--text-desc);">Нажми, чтобы открыть</div></div></div>
         </div>
 
         <div id="tab-profile" class="tab-content">
-            <h2 style="font-size:18px; margin-bottom:20px;">ПРОФИЛЬ</h2>
-            <div class="status-card" style="text-align:left; font-size:14px; line-height:2;" id="prof_data">
-                </div>
+            <h2 style="font-size:18px;">ПРОФИЛЬ</h2>
+            <div class="status-card" style="text-align:left; line-height:2;" id="prof_data"></div>
             <button class="back-btn" style="width:100%; margin-top:20px; color:#f87171; border-color:rgba(239,68,68,0.2);" onclick="hardReset()">СБРОСИТЬ ДАННЫЕ</button>
         </div>
     </div>
@@ -209,7 +198,10 @@
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-    let data = { name: 'АТЛЕТ', gender: '', age: '', height: '', weight: '', goal: '' };
+    
+    // Проверка сохраненных данных
+    let saved = localStorage.getItem('user_data');
+    let data = saved ? JSON.parse(saved) : { name: 'АТЛЕТ', gender: '', age: '', height: '', weight: '', goal: '' };
 
     const stepsText = {
         1: "Выбери пол и введи имя, чтобы начать путь.",
@@ -219,6 +211,7 @@
 
     function runWaveEffect(text) {
         const wrapper = document.getElementById('wave-title');
+        if(!wrapper) return;
         wrapper.innerHTML = '';
         text.split('').forEach((char, i) => {
             const span = document.createElement('span');
@@ -243,12 +236,12 @@
         let resBox = document.getElementById('bmi_res');
         if(data.height > 100 && data.weight > 30) {
             let bmi = (data.weight / ((data.height/100)**2)).toFixed(1);
-            let st = "", d = "", cl = "";
-            if(bmi < 18.5) { st = "Дефицит"; d = "Твой вес ниже нормы. Нужно больше калорий."; cl = "status-low"; }
-            else if(bmi < 25) { st = "Норма"; d = "Идеальный баланс. Отличный старт!"; cl = "status-good"; }
-            else if(bmi < 30) { st = "Избыток"; d = "Есть лишний вес. Скорректируем рацион."; cl = "status-warn"; }
-            else { st = "Ожирение"; d = "Требуется строгий контроль питания."; cl = "status-danger"; }
-            resBox.innerHTML = `<div class="bmi-value">ИМТ: ${bmi}</div><span class="bmi-status ${cl}">${st}</span><div class="bmi-text">${d}</div>`;
+            let st = "", cl = "";
+            if(bmi < 18.5) { st = "Дефицит"; cl = "status-low"; }
+            else if(bmi < 25) { st = "Норма"; cl = "status-good"; }
+            else if(bmi < 30) { st = "Избыток"; cl = "status-warn"; }
+            else { st = "Ожирение"; cl = "status-danger"; }
+            resBox.innerHTML = `<div class="bmi-value">ИМТ: ${bmi}</div><span class="bmi-status ${cl}">${st}</span>`;
             resBox.style.display = 'block';
         } else resBox.style.display = 'none';
         document.getElementById('b2').disabled = !(data.age && data.height && data.weight);
@@ -276,12 +269,19 @@
     }
 
     function hardReset() {
-        if(confirm("Сбросить все данные и начать заново?")) location.reload();
+        if(confirm("Сбросить все данные?")) {
+            localStorage.removeItem('user_data');
+            location.reload();
+        }
     }
 
     function finishSurvey() {
-        let name = document.getElementById('u_name').value.trim();
-        if(name) data.name = name;
+        let nameIn = document.getElementById('u_name').value.trim();
+        if(nameIn) data.name = nameIn;
+        
+        localStorage.setItem('user_data', JSON.stringify(data));
+
+        // Расчет калорий (Миффлин-Сан Жеор)
         let bmr = (10 * data.weight) + (6.25 * data.height) - (5 * data.age) + (data.gender === 'male' ? 5 : -161);
         let tdee = Math.round(bmr * 1.375);
         if(data.goal === 'weight_loss') tdee -= 400;
@@ -299,15 +299,21 @@
             ВЕС: ${data.weight} КГ<br>
             ЦЕЛЬ: ${data.goal === 'muscle_gain' ? 'НАБОР МАССЫ' : data.goal === 'weight_loss' ? 'ПОХУДЕНИЕ' : 'ПОДДЕРЖАНИЕ'}`;
 
-        tg.sendData(JSON.stringify(data));
-        document.getElementById('survey-page').classList.remove('active');
+        document.getElementById('survey-page').style.display = 'none';
         document.getElementById('main-page').classList.add('active');
         document.getElementById('bottom-nav').style.display = 'grid';
         document.getElementById('hi_user').innerText = `ПРИВЕТ, ${data.name.toUpperCase()}`;
+
+        // Мы не вызываем tg.sendData, чтобы приложение не закрывалось
     }
 
-    runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
-    document.getElementById('step-description').innerText = stepsText[1];
+    // Если данные уже есть, запускаем Dashboard сразу
+    if(saved) {
+        finishSurvey();
+    } else {
+        runWaveEffect("ЗАВТРА БУДЕТ ВСЕ ПРОЩЕ");
+        document.getElementById('step-description').innerText = stepsText[1];
+    }
 </script>
 </body>
 </html>
