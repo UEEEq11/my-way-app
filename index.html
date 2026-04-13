@@ -328,11 +328,25 @@
     }
 
     function handleFinish(btn) {
-        playClickAnim(btn);
-        data.name = document.getElementById('u_name').value.trim() || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "АТЛЕТ");
-        localStorage.setItem('user_data', JSON.stringify(data));
-        alert('Данные сохранены!');
-    }
+    playClickAnim(btn);
+    
+    // Сбор финальных данных
+    data.name = document.getElementById('u_name').value.trim() || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "АТЛЕТ");
+    data.age = document.getElementById('u_age').value;
+    data.height = document.getElementById('u_height').value;
+    data.weight = document.getElementById('u_weight').value;
+    data.dep_info = document.getElementById('dep_info').value;
+    data.health_desc = document.getElementById('h_desc').value;
+    data.kitchen_custom = document.getElementById('k_custom').value;
+    data.sport_custom = document.getElementById('s_custom').value;
+
+    // Сохранение в локальное хранилище (чтобы дашборд мог их прочитать)
+    localStorage.setItem('user_data', JSON.stringify(data));
+    
+    // Переход на файл дашборда
+    // Убедись, что файл называется именно dashboard.html и лежит в той же папке
+    window.location.href = 'dashboard.html';
+}
 
     nextS(0);
 </script>
