@@ -51,7 +51,6 @@
         .step { display: none; flex-direction: column; gap: 15px; }
         .step.active { display: flex; }
         
-        /* КРУТАЯ АНИМАЦИЯ ДЛЯ БЛОКОВ ТЕКСТА */
         .expand-box {
             max-height: 0; opacity: 0; transform: translateY(-10px); overflow: hidden;
             transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, transform 0.4s ease;
@@ -86,7 +85,6 @@
         .bmi-3 { background: #78350f; color: #fbbf24; border: 1px solid #f59e0b; }
         .bmi-4 { background: #7f1d1d; color: #f87171; border: 1px solid #ef4444; }
 
-        /* МОДАЛКИ (Пофиксены) */
         .modal { position: fixed; inset: 0; background: var(--modal-bg); z-index: 100; display: none; align-items: center; justify-content: center; padding: 30px; }
         .modal-content { text-align: center; background: #1e293b; padding: 30px; border-radius: 30px; border: 1px solid var(--accent-color); width: 100%; max-width: 340px; }
         .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
@@ -206,7 +204,7 @@
 <script>
     let tg = window.Telegram.WebApp;
     tg.expand();
-    let data = { name: '', gender: 'male', kitchen: [], sport: [], faith: '', health: null };
+    let data = { name: '', gender: 'male', kitchen: [], sport: [], faith: '', health: null, dep_type: 'none' };
 
     const steps = [
         { cat: "КТО ТЫ?", desc: "Укажи имя или мы возьмем его из Telegram." },
@@ -328,38 +326,47 @@
     }
 
     async function handleFinish(btn) {
-    playClickAnim(btn);
-    btn.disabled = true;
-    btn.innerText = "СИНХРОНИЗАЦИЯ...";
+        playClickAnim(btn);
+        btn.disabled = true;
+        btn.innerText = "СИНХРОНИЗАЦИЯ...";
 
-    // Собираем данные из полей (убедись, что ID совпадают с твоими input)
-    const surveyData = {
-        user_id: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0,
-        name: document.getElementById('u_name').value.trim() || "Атлет",
-        age: document.getElementById('u_age').value,
-        height: document.getElementById('u_height').value,
-        weight: document.getElementById('u_weight').value,
-        // Сюда можно докинуть остальные поля, если нужно
-    };
+        const kitchenFull = [...data.kitchen];
+        const kCustom = document.getElementById('k_custom').value.trim();
+        if(kCustom) kitchenFull.push(kCustom);
 
-    // 1. Сохраняем локально, чтобы дашборд сразу их открыл
-    localStorage.setItem('user_data', JSON.stringify(surveyData));
+        const sportFull = [...data.sport];
+        const sCustom = document.getElementById('s_custom').value.trim();
+        if(sCustom) sportFull.push(sCustom);
 
-    // 2. ОТПРАВЛЯЕМ НА СЕРВЕР (замени IP на свой из Термиуса!)
-    try {
-        await fetch('http://ТВОЙ_IP_СЕРВЕРА:8000/api/save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(surveyData)
-        });
-        console.log("Данные улетели в SQL");
-    } catch (e) {
-        console.error("Ошибка сети:", e);
+        const surveyData = {
+            user_id: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0,
+            name: document.getElementById('u_name').value.trim() || "Атлет",
+            gender: data.gender,
+            age: parseInt(document.getElementById('u_age').value),
+            height: parseFloat(document.getElementById('u_height').value),
+            weight: parseFloat(document.getElementById('u_weight').value),
+            religion: data.faith || "Свой путь",
+            addictions: data.dep_type === 'none' ? "Нет" : document.getElementById('dep_info').value.trim(),
+            kitchen_tools: kitchenFull.join(', '),
+            sport_tools: sportFull.join(', '),
+            health_status: data.health ? document.getElementById('h_desc').value.trim() : "Здоров"
+        };
+
+        localStorage.setItem('user_data', JSON.stringify(surveyData));
+
+        try {
+            await fetch('http://77.221.147.200:8000/api/save', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(surveyData)
+            });
+            console.log("SQL OK");
+        } catch (e) {
+            console.error("SQL Error:", e);
+        }
+
+        window.location.href = 'dashboard.html?v=' + Date.now();
     }
-
-    // 3. Переход на дашборд
-    window.location.href = 'dashboard.html?v=' + Date.now();
-}
     nextS(0);
 </script>
 </body>
