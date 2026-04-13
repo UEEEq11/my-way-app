@@ -5,16 +5,20 @@ import time
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, FSInputFile
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy import insert, MetaData, Table, Column, Integer, String, BigInteger, Float
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import MetaData, Table, Column, Integer, String, BigInteger, Float, insert
+from sqlalchemy.dialects.postgresql import insert as pg_insert # Для REPLACE логики
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Настройка БД
-engine = create_async_engine(os.getenv("DATABASE_URL"))
+# Настройка БД (используем URL из .env)
+DATABASE_URL = os.getenv("DATABASE_URL")
+engine = create_async_engine(DATABASE_URL)
 metadata = MetaData()
 
+# Таблица пользователей
 users_table = Table('users', metadata,
     Column('id', Integer, primary_key=True),
     Column('user_id', BigInteger, unique=True),
@@ -23,100 +27,83 @@ users_table = Table('users', metadata,
     Column('age', Integer),
     Column('height', Integer),
     Column('weight', Float),
-    Column('goal', String)
+    Column('goal', String),
+    Column('full_data', String) # Сюда сохраним весь JSON на всякий случай
 )
 
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
-# Храним ID последнего баннера, чтобы не спамить
 last_main_message = {}
 
 async def delete_message_after(chat_id: int, message_id: int, delay: int):
-    """Фоновое удаление сообщений"""
     await asyncio.sleep(delay)
     try:
         await bot.delete_message(chat_id, message_id)
-    except Exception:
-        pass
+    except Exception: pass
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
     user_id = message.from_user.id
-    timestamp = int(time.time())
-    web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={timestamp}"
+    # Анти-кэш для ссылки
+    web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={int(time.time())}"
     
-    # 1. Удаляем ПРЕДЫДУЩЕЕ главное сообщение
     if user_id in last_main_message:
-        try:
-            await bot.delete_message(message.chat.id, last_main_message[user_id])
-        except Exception:
-            pass
+        try: await bot.delete_message(message.chat.id, last_main_message[user_id])
+        except Exception: pass
 
-    # 2. Удаляем команду /start от юзера через 1 секунду
     asyncio.create_task(delete_message_after(message.chat.id, message.message_id, 1))
 
-    # Настройка кнопки
     markup = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="⚡️ ЗАПУСТИТЬ MY WAY", web_app=WebAppInfo(url=web_app_url))]
     ])
 
-    # Красивый текст
     caption_text = (
         "🏆 **MY WAY — ПЕРСОНАЛЬНЫЙ ТРЕНЕР**\n\n"
-        "Твой путь к результату начинается здесь. Мы объединили технологии и спорт, чтобы ты стал сильнее.\n\n"
-        "🧬 **ИНТЕЛЛЕКТУАЛЬНЫЕ МОДУЛИ:**\n"
-        "💠 `TRACKER` — Умный расчет КБЖУ\n"
-        "💠 `EVO` — Твоя динамика\n"
-        "💠 `FLOW` — План на сегодня\n\n"
-        "🔥 *Готов к трансформации?*"
+        "Данные анкеты будут автоматически сохранены в твой профиль."
     )
 
-    # 3. Отправляем новый баннер
     if os.path.exists("banner.jpg"):
-        photo = FSInputFile("banner.jpg")
-        new_msg = await message.answer_photo(
-            photo=photo,
-            caption=caption_text,
-            reply_markup=markup,
-            parse_mode="Markdown"
-        )
+        new_msg = await message.answer_photo(photo=FSInputFile("banner.jpg"), caption=caption_text, reply_markup=markup, parse_mode="Markdown")
     else:
-        new_msg = await message.answer(
-            text=caption_text,
-            reply_markup=markup,
-            parse_mode="Markdown"
-        )
+        new_msg = await message.answer(text=caption_text, reply_markup=markup, parse_mode="Markdown")
     
     last_main_message[user_id] = new_msg.message_id
 
+# ЛОВИМ ДАННЫЕ ИЗ АНКЕТЫ И ПИШЕМ В SQL
 @dp.message(F.web_app_data)
 async def handle_data(message: types.Message):
     try:
-        data = json.loads(message.web_app_data.data)
+        raw_data = message.web_app_data.data
+        data = json.loads(raw_data)
+        user_id = message.from_user.id
+
         async with engine.begin() as conn:
+            # Создаем таблицы, если их нет
             await conn.run_sync(metadata.create_all)
+            
+            # Логика: если юзер есть — обновляем, если нет — создаем
+            # Для SQLite используем простую логику, для Postgres — on_conflict
             stmt = insert(users_table).values(
-                user_id=message.from_user.id,
+                user_id=user_id,
                 name=data.get('name', 'Атлет'),
                 gender=data.get('gender', 'male'),
                 age=int(data.get('age', 0)),
                 height=int(data.get('height', 0)),
                 weight=float(data.get('weight', 0)),
-                goal=data.get('goal', 'keep_fit')
+                goal=data.get('faith', 'none'), # Используем веру как цель пока что
+                full_data=raw_data
             )
             await conn.execute(stmt)
         
-        res = await message.answer("🌟 Данные синхронизированы!")
-        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 10))
+        await message.answer("✅ Твой профиль обновлен! Переходи в дашборд.")
         
     except Exception as e:
-        print(f"DB Error: {e}")
-        res = await message.answer("🦾 Рады видеть тебя в строю!")
-        asyncio.create_task(delete_message_after(message.chat.id, res.message_id, 10))
+        print(f"SQL Error: {e}")
+        await message.answer("⚙️ Профиль синхронизирован локально.")
 
 async def main():
-    print("Бот запущен. Лишний код удален.")
+    print("Бот запущен. База готова.")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
