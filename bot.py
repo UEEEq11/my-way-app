@@ -1,110 +1,124 @@
 import asyncio
-import json
 import os
+import json
 import time
+import uvicorn
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, FSInputFile
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, FSInputFile
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import MetaData, Table, Column, Integer, String, BigInteger, Float, insert
-from sqlalchemy.dialects.postgresql import insert as pg_insert # Для REPLACE логики
+from sqlalchemy.dialects.sqlite import insert as sqlite_upsert
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Настройка БД (используем URL из .env)
-DATABASE_URL = os.getenv("DATABASE_URL")
-engine = create_async_engine(DATABASE_URL)
+# --- 1. НАСТРОЙКА БАЗЫ ДАННЫХ ---
+# Используем SQLite (файл users_data.db), если в .env не указано иное
+DB_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./users_data.db")
+engine = create_async_engine(DB_URL)
 metadata = MetaData()
 
-# Таблица пользователей
 users_table = Table('users', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('user_id', BigInteger, unique=True),
+    Column('user_id', BigInteger, primary_key=True),
     Column('name', String),
-    Column('gender', String),
     Column('age', Integer),
     Column('height', Integer),
     Column('weight', Float),
-    Column('goal', String),
-    Column('full_data', String) # Сюда сохраним весь JSON на всякий случай
+    Column('data_json', String) # Сюда сохраним всё остальное (цели, веру и т.д.)
 )
 
+# --- 2. НАСТРОЙКА БОТА ---
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 dp = Dispatcher()
 
-last_main_message = {}
-
-async def delete_message_after(chat_id: int, message_id: int, delay: int):
-    await asyncio.sleep(delay)
-    try:
-        await bot.delete_message(chat_id, message_id)
-    except Exception: pass
-
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
-    user_id = message.from_user.id
-    # Анти-кэш для ссылки
+    # Анти-кэш ссылка
     web_app_url = f"https://ueeeq11.github.io/my-way-app/?v={int(time.time())}"
     
-    if user_id in last_main_message:
-        try: await bot.delete_message(message.chat.id, last_main_message[user_id])
-        except Exception: pass
-
-    asyncio.create_task(delete_message_after(message.chat.id, message.message_id, 1))
-
     markup = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="⚡️ ЗАПУСТИТЬ MY WAY", web_app=WebAppInfo(url=web_app_url))]
     ])
 
     caption_text = (
-        "🏆 **MY WAY — ПЕРСОНАЛЬНЫЙ ТРЕНЕР**\n\n"
-        "Данные анкеты будут автоматически сохранены в твой профиль."
+        "🏆 **MY WAY — ТВОЙ ПУТЬ К ТРАНСФОРМАЦИИ**\n\n"
+        "Заполни анкету, и мы сформируем твою личную карту прогресса."
     )
 
     if os.path.exists("banner.jpg"):
-        new_msg = await message.answer_photo(photo=FSInputFile("banner.jpg"), caption=caption_text, reply_markup=markup, parse_mode="Markdown")
+        await message.answer_photo(photo=FSInputFile("banner.jpg"), caption=caption_text, reply_markup=markup, parse_mode="Markdown")
     else:
-        new_msg = await message.answer(text=caption_text, reply_markup=markup, parse_mode="Markdown")
-    
-    last_main_message[user_id] = new_msg.message_id
+        await message.answer(text=caption_text, reply_markup=markup, parse_mode="Markdown")
 
-# ЛОВИМ ДАННЫЕ ИЗ АНКЕТЫ И ПИШЕМ В SQL
-@dp.message(F.web_app_data)
-async def handle_data(message: types.Message):
+# --- 3. НАСТРОЙКА API (FastAPI) ---
+app = FastAPI()
+
+# Это важно, чтобы браузер (Mini App) мог слать запросы на твой сервер
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.post("/api/save")
+async def save_survey_data(request: Request):
     try:
-        raw_data = message.web_app_data.data
-        data = json.loads(raw_data)
-        user_id = message.from_user.id
+        data = await request.json()
+        u_id = int(data.get("user_id", 0))
+        
+        if u_id == 0:
+            return {"status": "error", "message": "no user_id"}
 
         async with engine.begin() as conn:
             # Создаем таблицы, если их нет
             await conn.run_sync(metadata.create_all)
             
-            # Логика: если юзер есть — обновляем, если нет — создаем
-            # Для SQLite используем простую логику, для Postgres — on_conflict
-            stmt = insert(users_table).values(
-                user_id=user_id,
+            # Логика "Добавь или Обнови" (Upsert)
+            stmt = sqlite_upsert(users_table).values(
+                user_id=u_id,
                 name=data.get('name', 'Атлет'),
-                gender=data.get('gender', 'male'),
                 age=int(data.get('age', 0)),
                 height=int(data.get('height', 0)),
                 weight=float(data.get('weight', 0)),
-                goal=data.get('faith', 'none'), # Используем веру как цель пока что
-                full_data=raw_data
+                data_json=json.dumps(data)
+            )
+            # Если такой user_id уже есть — обновляем поля
+            stmt = stmt.on_conflict_do_update(
+                index_elements=['user_id'],
+                set_={
+                    "name": stmt.excluded.name,
+                    "age": stmt.excluded.age,
+                    "height": stmt.excluded.height,
+                    "weight": stmt.excluded.weight,
+                    "data_json": stmt.excluded.data_json
+                }
             )
             await conn.execute(stmt)
         
-        await message.answer("✅ Твой профиль обновлен! Переходи в дашборд.")
-        
+        print(f"✅ Данные юзера {u_id} сохранены в SQL")
+        return {"status": "success"}
     except Exception as e:
-        print(f"SQL Error: {e}")
-        await message.answer("⚙️ Профиль синхронизирован локально.")
+        print(f"❌ Ошибка SQL: {e}")
+        return {"status": "error", "message": str(e)}
 
+# --- 4. ЗАПУСК БОТА И API ---
 async def main():
-    print("Бот запущен. База готова.")
-    await dp.start_polling(bot)
+    # Запускаем FastAPI на порту 8000 в фоновом режиме
+    config = uvicorn.Config(app, host="0.0.0.0", port=8000, loop="asyncio")
+    server = uvicorn.Server(config)
+    
+    # Используем gather, чтобы бот и сервер работали одновременно
+    await asyncio.gather(
+        server.serve(),
+        dp.start_polling(bot)
+    )
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        print("Бот остановлен")
