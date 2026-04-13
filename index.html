@@ -332,32 +332,32 @@
     btn.disabled = true;
     btn.innerText = "СИНХРОНИЗАЦИЯ...";
 
-    // 1. Собираем данные
-    data.user_id = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
-    data.name = document.getElementById('u_name').value.trim() || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "АТЛЕТ");
-    data.age = document.getElementById('u_age').value;
-    data.height = document.getElementById('u_height').value;
-    data.weight = document.getElementById('u_weight').value;
+    // Собираем данные из полей (убедись, что ID совпадают с твоими input)
+    const surveyData = {
+        user_id: tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0,
+        name: document.getElementById('u_name').value.trim() || "Атлет",
+        age: document.getElementById('u_age').value,
+        height: document.getElementById('u_height').value,
+        weight: document.getElementById('u_weight').value,
+        // Сюда можно докинуть остальные поля, если нужно
+    };
 
-    // 2. Сохраняем локально (чтобы дашборд сразу их подтянул)
-    localStorage.setItem('user_data', JSON.stringify(data));
+    // 1. Сохраняем локально, чтобы дашборд сразу их открыл
+    localStorage.setItem('user_data', JSON.stringify(surveyData));
 
-    // 3. Шлем в базу на твой IP (Замени 1.2.3.4 на IP своего сервера!)
+    // 2. ОТПРАВЛЯЕМ НА СЕРВЕР (замени IP на свой из Термиуса!)
     try {
-        const response = await fetch('http://1.2.3.4:8000/api/save', {
+        await fetch('http://ТВОЙ_IP_СЕРВЕРА:8000/api/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(surveyData)
         });
-        
-        if (response.ok) {
-            console.log("Данные в SQL!");
-        }
+        console.log("Данные улетели в SQL");
     } catch (e) {
-        console.error("Ошибка связи с сервером:", e);
+        console.error("Ошибка сети:", e);
     }
 
-    // 4. Идем на дашборд
+    // 3. Переход на дашборд
     window.location.href = 'dashboard.html?v=' + Date.now();
 }
     nextS(0);
