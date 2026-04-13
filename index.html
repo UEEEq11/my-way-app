@@ -327,10 +327,14 @@
         window.scrollTo(0,0);
     }
 
-    function handleFinish(btn) {
+    async function handleFinish(btn) {
     playClickAnim(btn);
     
-    // Сбор финальных данных
+    // Блокируем кнопку, чтобы не было повторных нажатий
+    btn.disabled = true;
+    btn.innerText = "СИНХРОНИЗАЦИЯ...";
+
+    // Собираем все данные из полей ввода
     data.name = document.getElementById('u_name').value.trim() || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "АТЛЕТ");
     data.age = document.getElementById('u_age').value;
     data.height = document.getElementById('u_height').value;
@@ -340,14 +344,35 @@
     data.kitchen_custom = document.getElementById('k_custom').value;
     data.sport_custom = document.getElementById('s_custom').value;
 
-    // Сохранение в локальное хранилище (чтобы дашборд мог их прочитать)
-    localStorage.setItem('user_data', JSON.stringify(data));
-    
-    // Переход на файл дашборда
-    // Убедись, что файл называется именно dashboard.html и лежит в той же папке
-    window.location.href = 'dashboard.html';
-}
+    // Добавляем ID пользователя Telegram для базы данных
+    data.user_id = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
 
+    // 1. Сохраняем локально (для мгновенной работы дашборда)
+    localStorage.setItem('user_data', JSON.stringify(data));
+
+    // 2. Отправляем в SQL через твой Python API
+    try {
+        // ОБЯЗАТЕЛЬНО: замени 1.2.3.4 на реальный IP твоего сервера
+        const response = await fetch('http://145.22.33.44:8000/api/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            console.log("Данные успешно сохранены в SQL");
+        }
+    } catch (e) {
+        // Если сервер выключен, данные всё равно останутся в localStorage
+        console.error("Ошибка сохранения в базу:", e);
+    }
+
+    // 3. Переход на дашборд (теперь без закрытия приложения)
+    // Добавляем параметр ?v для обхода кэша
+    window.location.href = 'dashboard.html?v=' + Date.now();
+}
     nextS(0);
 </script>
 </body>
