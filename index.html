@@ -329,48 +329,35 @@
 
     async function handleFinish(btn) {
     playClickAnim(btn);
-    
-    // Блокируем кнопку, чтобы не было повторных нажатий
     btn.disabled = true;
     btn.innerText = "СИНХРОНИЗАЦИЯ...";
 
-    // Собираем все данные из полей ввода
+    // 1. Собираем данные
+    data.user_id = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
     data.name = document.getElementById('u_name').value.trim() || (tg.initDataUnsafe.user ? tg.initDataUnsafe.user.first_name : "АТЛЕТ");
     data.age = document.getElementById('u_age').value;
     data.height = document.getElementById('u_height').value;
     data.weight = document.getElementById('u_weight').value;
-    data.dep_info = document.getElementById('dep_info').value;
-    data.health_desc = document.getElementById('h_desc').value;
-    data.kitchen_custom = document.getElementById('k_custom').value;
-    data.sport_custom = document.getElementById('s_custom').value;
 
-    // Добавляем ID пользователя Telegram для базы данных
-    data.user_id = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
-
-    // 1. Сохраняем локально (для мгновенной работы дашборда)
+    // 2. Сохраняем локально (чтобы дашборд сразу их подтянул)
     localStorage.setItem('user_data', JSON.stringify(data));
 
-    // 2. Отправляем в SQL через твой Python API
+    // 3. Шлем в базу на твой IP (Замени 1.2.3.4 на IP своего сервера!)
     try {
-        // ОБЯЗАТЕЛЬНО: замени 1.2.3.4 на реальный IP твоего сервера
-        const response = await fetch('http://145.22.33.44:8000/api/save', {
+        const response = await fetch('http://1.2.3.4:8000/api/save', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
         
         if (response.ok) {
-            console.log("Данные успешно сохранены в SQL");
+            console.log("Данные в SQL!");
         }
     } catch (e) {
-        // Если сервер выключен, данные всё равно останутся в localStorage
-        console.error("Ошибка сохранения в базу:", e);
+        console.error("Ошибка связи с сервером:", e);
     }
 
-    // 3. Переход на дашборд (теперь без закрытия приложения)
-    // Добавляем параметр ?v для обхода кэша
+    // 4. Идем на дашборд
     window.location.href = 'dashboard.html?v=' + Date.now();
 }
     nextS(0);
