@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Way - Journey</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --accent-color: #3b82f6;
+            --text-main: #f8fafc;
+            --text-desc: #cbd5e1;
+        }
+
+        * { 
+            font-family: 'Comfortaa', sans-serif; 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body { 
+            background: var(--bg-gradient); 
+            color: var(--text-main); 
+            margin: 0; 
+            min-height: 100vh; 
+            overflow-x: hidden;
+        }
+
+        /* Контейнер для карты */
+        .content-wrapper {
+            transition: filter 0.3s ease, transform 0.3s ease;
+            padding-bottom: 120px;
+        }
+
+        .content-wrapper.blurred {
+            filter: blur(10px);
+            transform: scale(0.95);
+        }
+
+        .header {
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-status b { font-size: 20px; display: block; }
+        .user-status span { font-size: 12px; color: var(--accent-color); font-weight: 700; }
+
+        /* ИЗОМЕТРИЧЕСКАЯ КАРТА */
+        .map-container {
+            perspective: 1000px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .tile-row {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            height: 100px;
+        }
+
+        /* Зигзаг: нечетные вправо, четные влево */
+        .tile-row:nth-child(odd) { transform: translateX(40px); }
+        .tile-row:nth-child(even) { transform: translateX(-40px); }
+
+        .tile {
+            width: 70px;
+            height: 70px;
+            background: var(--card-bg);
+            border: 2px solid rgba(255,255,255,0.05);
+            border-radius: 18px;
+            transform: rotateX(45deg) rotateZ(-45deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .tile.active {
+            border-color: var(--accent-color);
+            background: rgba(59, 130, 246, 0.2);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 10px 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .tile span {
+            transform: rotateZ(45deg) rotateX(-45deg);
+            font-weight: 700;
+            font-size: 18px;
+            color: white;
+        }
+
+        /* Друзья на карте */
+        .friend-mark {
+            position: absolute;
+            top: -25px;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            background: #fff center/cover;
+            transform: rotateZ(45deg) rotateX(-45deg);
+            animation: float 2.5s infinite ease-in-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateZ(45deg) rotateX(-45deg); }
+            50% { transform: translateY(-10px) rotateZ(45deg) rotateX(-45deg); }
+        }
+
+        /* ЦЕНТРАЛЬНАЯ КНОПКА */
+        .fab {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+            z-index: 1001;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .fab svg { width: 30px; height: 30px; fill: white; transition: 0.3s; }
+        .fab.open { transform: translateX(-50%) rotate(135deg); background: #ef4444; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5); }
+
+        /* ВЫЛЕТАЮЩЕЕ МЕНЮ */
+        .menu-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .menu-item {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: slideUp 0.3s forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .menu-item i { font-size: 30px; display: block; margin-bottom: 10px; font-style: normal; }
+        .menu-item b { font-size: 12px; letter-spacing: 1px; color: var(--text-main); }
+    </style>
+</head>
+<body>
+
+<div class="content-wrapper" id="mainContent">
+    <div class="header">
+        <div class="user-status">
+            <span id="label">ТВОЙ ПУТЬ</span>
+            <b id="user-name">АТЛЕТ</b>
+        </div>
+        <div id="bmi-badge" style="background: var(--card-bg); padding: 8px 15px; border-radius: 12px; font-size: 12px; border: 1px solid var(--accent-color);">
+            ИМТ: <span id="bmi-val">--</span>
+        </div>
+    </div>
+
+    <div class="map-container" id="map">
+        </div>
+</div>
+
+<div class="menu-overlay" id="menuOverlay">
+    <div class="menu-grid">
+        <div class="menu-item" style="animation-delay: 0.05s;"><i>🥗</i><b>ПИТАНИЕ</b></div>
+        <div class="menu-item" style="animation-delay: 0.1s;"><i>💪</i><b>ТРЕНИНГ</b></div>
+        <div class="menu-item" style="animation-delay: 0.15s;"><i>👥</i><b>СОЦИАЛ</b></div>
+        <div class="menu-item" style="animation-delay: 0.2s;"><i>⚙️</i><b>НАСТРОЙКИ</b></div>
+    </div>
+</div>
+
+<div class="fab" id="fab" onclick="toggleMenu()">
+    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+</div>
+
+<script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+
+    function toggleMenu() {
+        const fab = document.getElementById('fab');
+        const overlay = document.getElementById('menuOverlay');
+        const content = document.getElementById('mainContent');
+        
+        const isOpen = fab.classList.toggle('open');
+        overlay.style.display = isOpen ? 'flex' : 'none';
+        content.classList.toggle('blurred', isOpen);
+        
+        if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+    }
+
+    // Рендер карты
+    function renderMap() {
+        const map = document.getElementById('map');
+        const totalSteps = 15; // Сколько дней/плиток показывать
+        const currentDay = 4;  // На каком дне юзер
+
+        for (let i = 1; i <= totalSteps; i++) {
+            const row = document.createElement('div');
+            row.className = 'tile-row';
+            
+            const tile = document.createElement('div');
+            tile.className = `tile ${i <= currentDay ? 'active' : ''}`;
+            tile.innerHTML = `<span>${i}</span>`;
+            
+            // Добавим "друга" на 6-й день для примера
+            if (i === 6) {
+                const friend = document.createElement('div');
+                friend.className = 'friend-mark';
+                friend.style.backgroundImage = "url('https://i.pravatar.cc/100?u=6')";
+                tile.appendChild(friend);
+            }
+
+            row.appendChild(tile);
+            map.appendChild(row);
+        }
+    }
+
+    // Загрузка данных
+    const savedData = localStorage.getItem('user_data');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        document.getElementById('user-name').innerText = data.name.toUpperCase();
+        if (data.weight && data.height) {
+            const bmi = (data.weight / ((data.height / 100) ** 2)).toFixed(1);
+            document.getElementById('bmi-val').innerText = bmi;
+        }
+    }
+
+    renderMap();
+</script>
+
+</body>
+</html>
