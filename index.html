@@ -355,7 +355,7 @@
         localStorage.setItem('user_data', JSON.stringify(surveyData));
 
         try {
-            await fetch('http://77.221.147.200:8000/api/save', {
+            await fetch('http://165.22.64.222/api/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(surveyData)
